@@ -1,0 +1,1965 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Crear Webs Animadas con IA — Tutorial Técnico</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#0a0e1a;--card:#0f172a;--border:#1e3a5f;--accent:#00d4ff;
+    --green:#22c55e;--amber:#f59e0b;--red:#ef4444;--purple:#a855f7;
+    --text:#e2e8f0;--muted:#94a3b8;--dim:#64748b;
+  }
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--bg);color:var(--text);
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    line-height:1.6;overflow-x:hidden;padding-top:56px;
+  }
+  /* PROGRESS BAR */
+  .progress-bar{
+    position:fixed;top:0;left:0;height:3px;width:0%;
+    background:linear-gradient(90deg,var(--accent),var(--green),var(--purple));
+    z-index:2000;transition:width .1s linear;box-shadow:0 0 8px var(--accent);
+  }
+  /* NAVBAR */
+  .navbar{
+    position:fixed;top:3px;left:0;right:0;height:53px;z-index:1500;
+    background:rgba(10,14,26,.94);backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-scroll{
+    display:flex;gap:6px;overflow-x:auto;padding:8px 12px;height:100%;
+    align-items:center;scrollbar-width:thin;scrollbar-color:var(--border) transparent;
+  }
+  .nav-scroll::-webkit-scrollbar{height:4px}
+  .nav-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+  .nav-scroll button{
+    background:transparent;border:1px solid var(--border);color:var(--muted);
+    padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;
+    letter-spacing:.5px;cursor:pointer;white-space:nowrap;transition:all .2s;
+    font-family:inherit;
+  }
+  .nav-scroll button:hover{color:var(--accent);border-color:var(--accent)}
+  .nav-scroll button.active{
+    background:linear-gradient(135deg,rgba(0,212,255,.15),rgba(168,85,247,.1));
+    color:var(--accent);border-color:var(--accent);
+    box-shadow:0 0 12px rgba(0,212,255,.3);
+  }
+  .nav-scroll button.credits-btn{color:var(--amber);border-color:rgba(245,158,11,.4)}
+  .nav-scroll button.credits-btn:hover,.nav-scroll button.credits-btn.active{
+    color:var(--amber);border-color:var(--amber);box-shadow:0 0 12px rgba(245,158,11,.3)
+  }
+  /* MAIN */
+  main{max-width:1180px;margin:0 auto;padding:24px 16px 60px}
+  .section{display:none;animation:fadeIn .4s ease}
+  .section.active{display:block}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+  /* TYPOGRAPHY */
+  h1{font-size:clamp(28px,4vw,42px);font-weight:800;letter-spacing:-.02em;line-height:1.15;margin-bottom:12px}
+  h2{font-size:clamp(22px,3vw,30px);font-weight:700;margin:32px 0 16px;letter-spacing:-.01em;
+     color:var(--text);border-left:3px solid var(--accent);padding-left:14px}
+  h3{font-size:18px;font-weight:700;margin:24px 0 10px;color:var(--accent)}
+  h4{font-size:15px;font-weight:700;margin:16px 0 8px;color:var(--text)}
+  p{margin-bottom:12px;color:var(--text)}
+  ul,ol{margin:10px 0 14px 22px}
+  li{margin-bottom:6px}
+  a{color:var(--accent);text-decoration:none;border-bottom:1px dashed rgba(0,212,255,.4)}
+  a:hover{color:#fff;border-bottom-color:#fff}
+  code{background:#1a2540;color:var(--accent);padding:2px 7px;border-radius:5px;font-size:.88em;
+       font-family:'Consolas',monospace;border:1px solid var(--border)}
+  strong{color:#fff;font-weight:700}
+  em{color:var(--muted)}
+  /* CARD */
+  .card{
+    background:var(--card);border:1px solid var(--border);border-radius:12px;
+    padding:18px 20px;margin-bottom:16px;transition:border-color .2s,transform .2s;
+  }
+  .card:hover{border-color:rgba(0,212,255,.5)}
+  .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:16px}
+  .card-grid .card{margin-bottom:0}
+  /* BADGES */
+  .badge{
+    display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;
+    font-weight:700;letter-spacing:1px;text-transform:uppercase;
+    border:1px solid;margin-bottom:8px;
+  }
+  .badge.blue{color:var(--accent);border-color:rgba(0,212,255,.4);background:rgba(0,212,255,.08)}
+  .badge.green{color:var(--green);border-color:rgba(34,197,94,.4);background:rgba(34,197,94,.08)}
+  .badge.amber{color:var(--amber);border-color:rgba(245,158,11,.4);background:rgba(245,158,11,.08)}
+  .badge.red{color:var(--red);border-color:rgba(239,68,68,.4);background:rgba(239,68,68,.08)}
+  .badge.purple{color:var(--purple);border-color:rgba(168,85,247,.4);background:rgba(168,85,247,.08)}
+  /* CALLOUTS */
+  .callout{
+    border-radius:10px;padding:14px 16px;margin:14px 0;
+    border-left:4px solid;background:rgba(15,23,42,.9);
+  }
+  .callout .lbl{font-size:11px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;display:block}
+  .callout.info{border-color:var(--accent)} .callout.info .lbl{color:var(--accent)}
+  .callout.example{border-color:var(--green)} .callout.example .lbl{color:var(--green)}
+  .callout.warn{border-color:var(--amber)} .callout.warn .lbl{color:var(--amber)}
+  .callout.error{border-color:var(--red)} .callout.error .lbl{color:var(--red)}
+  .callout.tip{border-color:var(--purple)} .callout.tip .lbl{color:var(--purple)}
+  /* PROMPT BLOCK */
+  .prompt{
+    background:#0a1525;border:1px solid var(--border);border-left:3px solid var(--accent);
+    border-radius:10px;padding:14px 16px;margin:14px 0;position:relative;
+  }
+  .prompt::before{
+    content:'PROMPT';position:absolute;top:-10px;left:14px;
+    background:var(--accent);color:#000;font-size:10px;font-weight:800;
+    padding:2px 8px;border-radius:10px;letter-spacing:1px;
+  }
+  .prompt.p2::before{background:var(--green)} .prompt.p2{border-left-color:var(--green)}
+  .prompt.p3::before{background:var(--purple)} .prompt.p3{border-left-color:var(--purple)}
+  .prompt.p4::before{background:var(--amber)} .prompt.p4{border-left-color:var(--amber)}
+  .prompt .ptext{
+    font-family:'Consolas',monospace;font-size:13px;line-height:1.7;
+    color:#cbd5e1;font-style:italic;margin-top:6px;
+  }
+  /* TABLE */
+  .tbl-wrap{overflow-x:auto;margin:16px 0;border:1px solid var(--border);border-radius:10px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:520px}
+  th{background:#152040;color:var(--accent);padding:12px 14px;text-align:left;
+     font-weight:700;font-size:12px;letter-spacing:1px;text-transform:uppercase;
+     border-bottom:1px solid var(--border)}
+  td{padding:11px 14px;border-bottom:1px solid rgba(30,58,95,.5);color:var(--text);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  tr:hover td{background:rgba(0,212,255,.04)}
+  /* CHECKLIST */
+  .checklist{list-style:none;margin:12px 0}
+  .checklist li{padding:8px 0 8px 30px;position:relative;border-bottom:1px solid rgba(30,58,95,.4)}
+  .checklist li::before{
+    content:'';position:absolute;left:4px;top:14px;width:14px;height:14px;
+    border:1.5px solid var(--accent);border-radius:4px;
+  }
+  .checklist li::after{
+    content:'✓';position:absolute;left:6px;top:11px;color:var(--accent);
+    font-size:11px;font-weight:800;
+  }
+  /* STEP */
+  .step{
+    display:flex;gap:14px;margin:14px 0;padding:14px;
+    background:var(--card);border:1px solid var(--border);border-radius:10px;
+  }
+  .step-num{
+    flex-shrink:0;width:36px;height:36px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--purple));
+    color:#000;font-weight:800;display:flex;align-items:center;justify-content:center;
+    font-size:14px;
+  }
+  .step-body{flex:1;min-width:0}
+  .step-body h4{margin-top:0}
+  /* HERO */
+  .hero{
+    background:linear-gradient(160deg,#0f172a 0%,#0a0e1a 100%);
+    border:1px solid var(--border);border-radius:14px;
+    padding:20px;margin-bottom:24px;position:relative;overflow:hidden;
+  }
+  .hero-svg-wrap{margin:0 0 22px;border-radius:12px;overflow:hidden;
+    border:1px solid var(--border);box-shadow:0 0 40px rgba(0,212,255,.15)}
+  .hero-svg-wrap svg{display:block;width:100%;height:auto}
+  .hero h1{background:linear-gradient(90deg,#fff 20%,var(--accent) 60%,var(--purple) 100%);
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+  .quote{
+    border-left:3px solid var(--amber);padding:10px 16px;margin:18px 0;
+    background:rgba(245,158,11,.06);border-radius:0 10px 10px 0;
+    font-style:italic;color:#fbbf24;font-size:14.5px;
+  }
+  .metrics{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin:18px 0}
+  .metric{background:#0a1525;border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+  .metric .num{font-size:24px;font-weight:800;color:var(--accent);display:block;line-height:1}
+  .metric .lbl{font-size:10px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:4px;display:block}
+  .hero-meta{display:flex;flex-wrap:wrap;gap:14px;font-size:12px;color:var(--muted);margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+  .hero-meta span{display:flex;align-items:center;gap:6px}
+  /* DIAGRAM / FLOW */
+  .diagram{
+    background:#070b14;border:1px solid var(--border);border-radius:10px;
+    padding:16px;margin:14px 0;overflow-x:auto;
+  }
+  .diagram pre{
+    font-family:'Consolas',monospace;font-size:12px;color:var(--accent);
+    line-height:1.5;white-space:pre;margin:0;
+  }
+  /* BEFORE/AFTER */
+  .ba-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+  .ba-grid .no,.ba-grid .yes{padding:12px 14px;border-radius:10px;font-size:13.5px}
+  .ba-grid .no{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.35)}
+  .ba-grid .yes{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.35)}
+  .ba-grid .no::before{content:'❌ INCORRECTO';display:block;color:var(--red);font-size:10px;font-weight:800;letter-spacing:1px;margin-bottom:6px}
+  .ba-grid .yes::before{content:'✅ CORRECTO';display:block;color:var(--green);font-size:10px;font-weight:800;letter-spacing:1px;margin-bottom:6px}
+  /* ACCORDION */
+  .acc{border:1px solid var(--border);border-radius:10px;margin-bottom:10px;overflow:hidden;background:var(--card)}
+  .acc-head{
+    padding:14px 16px;cursor:pointer;display:flex;justify-content:space-between;
+    align-items:center;font-weight:700;font-size:14px;color:var(--text);
+    background:linear-gradient(90deg,rgba(0,212,255,.05),transparent);
+  }
+  .acc-head:hover{background:linear-gradient(90deg,rgba(0,212,255,.12),transparent)}
+  .acc-head::after{content:'+';color:var(--accent);font-size:20px;font-weight:400;transition:transform .3s}
+  .acc.open .acc-head::after{transform:rotate(45deg)}
+  .acc-head .badge{margin:0 0 0 auto;margin-right:14px;font-size:10px;padding:2px 8px}
+  .acc-body{max-height:0;overflow:hidden;transition:max-height .4s ease;padding:0 16px}
+  .acc.open .acc-body{max-height:4000px;padding:0 16px 16px}
+  /* PROMPT INDEX */
+  .prompt-index{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px;margin:14px 0}
+  .pi-card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:14px}
+  .pi-card .pi-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+  .pi-card .pi-num{font-size:11px;font-weight:800;color:var(--accent);letter-spacing:1px}
+  .pi-card .pi-tool{font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700}
+  .pi-card .pi-tool.chatgpt{background:rgba(34,197,94,.15);color:var(--green)}
+  .pi-card .pi-tool.flow{background:rgba(245,158,11,.15);color:var(--amber)}
+  .pi-card .pi-tool.anti{background:rgba(168,85,247,.15);color:var(--purple)}
+  .pi-card .pi-text{font-size:12.5px;color:#cbd5e1;font-style:italic;line-height:1.6}
+  /* BACK TO TOP */
+  .back-top{
+    position:fixed;right:18px;bottom:18px;width:46px;height:46px;border-radius:50%;
+    background:linear-gradient(135deg,var(--accent),var(--purple));
+    color:#000;border:none;font-size:20px;font-weight:800;cursor:pointer;
+    box-shadow:0 4px 20px rgba(0,212,255,.5);opacity:0;pointer-events:none;
+    transition:opacity .3s,transform .3s;z-index:1000;display:flex;
+    align-items:center;justify-content:center;
+  }
+  .back-top.show{opacity:1;pointer-events:auto}
+  .back-top:hover{transform:translateY(-3px) scale(1.05)}
+  /* FOOTER */
+  footer{
+    background:#070b14;border-top:1px solid var(--border);
+    padding:22px 16px;text-align:center;font-size:12.5px;color:var(--muted);
+    line-height:2;
+  }
+  footer strong{color:var(--accent)}
+  /* CREDITS */
+  .credits-svg-wrap{margin:18px 0;border-radius:12px;overflow:hidden;border:1px solid var(--border);box-shadow:0 0 40px rgba(168,85,247,.2)}
+  .credits-svg-wrap svg{display:block;width:100%;height:auto}
+  .credits-card{
+    background:linear-gradient(160deg,#0f172a,#0a0e1a);border:1px solid var(--border);
+    border-radius:14px;padding:26px;text-align:center;margin:20px 0;
+  }
+  .credits-card .name{font-size:26px;font-weight:800;
+    background:linear-gradient(90deg,var(--accent),var(--purple));
+    -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+    margin:8px 0}
+  .credits-card .latin{font-style:italic;color:var(--amber);margin-top:14px;font-size:14px}
+  /* EJERCICIOS */
+  .ex-meta{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:6px}
+  .ex-title{font-weight:700;font-size:14px;color:var(--text)}
+  .ex-legend{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:14px 0 22px}
+  .ex-legend .lg{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:12px 14px}
+  .ex-legend .lg .t{font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:4px;display:block}
+  .ex-legend .lg .d{font-size:13px;color:var(--text)}
+  /* MOBILE */
+  @media (max-width:640px){
+    main{padding:18px 12px 60px}
+    .card{padding:14px}
+    .hero{padding:14px}
+    .step{padding:12px;gap:10px}
+    .step-num{width:30px;height:30px;font-size:12px}
+    .ba-grid{grid-template-columns:1fr}
+    .nav-scroll button{padding:5px 10px;font-size:11px}
+    h2{padding-left:10px}
+  }
+  /* REDUCED MOTION */
+  @media (prefers-reduced-motion:reduce){
+    *{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar"></div>
+
+<nav class="navbar">
+  <div class="nav-scroll" id="navScroll">
+    <button data-sec="home" class="active">HOME</button>
+    <button data-sec="intro">INTRODUCCIÓN</button>
+    <button data-sec="comp">COMPARATIVA</button>
+    <button data-sec="cap1">CAP 1 · FUNDAMENTOS</button>
+    <button data-sec="cap2">CAP 2 · DIRECCIÓN</button>
+    <button data-sec="cap3">CAP 3 · VIDEO</button>
+    <button data-sec="cap4">CAP 4 · ANTIGRAVITY</button>
+    <button data-sec="cap5">CAP 5 · DESPLIEGUE</button>
+    <button data-sec="cap6">CAP 6 · PROMPTS</button>
+    <button data-sec="cap7">CAP 7 · CONCLUSIÓN</button>
+    <button data-sec="ejercicios">EJERCICIOS</button>
+    <button data-sec="fuentes">FUENTES</button>
+    <button data-sec="creditos" class="credits-btn">CRÉDITOS</button>
+  </div>
+</nav>
+
+<main>
+
+<!-- ================= HOME ================= -->
+<section id="home" class="section active">
+  <div class="hero">
+    <div class="hero-svg-wrap" id="svgHomeWrap">
+      <!-- SVG MAESTRO -->
+      <svg id="masterSVG" viewBox="0 0 800 450" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="xMidYMid meet">
+        <defs>
+          <radialGradient id="gBg" cx="50%" cy="50%" r="75%">
+            <stop offset="0%" stop-color="#0f172a">
+              <animate attributeName="stop-color" values="#0f172a;#152040;#0f172a;#1a2540;#0f172a" dur="9s" repeatCount="indefinite"/>
+            </stop>
+            <stop offset="60%" stop-color="#0a0e1a">
+              <animate attributeName="stop-color" values="#0a0e1a;#0d1526;#0a0e1a" dur="7s" repeatCount="indefinite"/>
+            </stop>
+            <stop offset="100%" stop-color="#070b14"/>
+          </radialGradient>
+          <radialGradient id="gHaloCyan" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#00d4ff" stop-opacity="0.75"/>
+            <stop offset="40%" stop-color="#00d4ff" stop-opacity="0.25"/>
+            <stop offset="100%" stop-color="#00d4ff" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="gHaloGreen" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#22c55e" stop-opacity="0.75"/>
+            <stop offset="40%" stop-color="#22c55e" stop-opacity="0.25"/>
+            <stop offset="100%" stop-color="#22c55e" stop-opacity="0"/>
+          </radialGradient>
+          <radialGradient id="gHaloPurple" cx="50%" cy="50%" r="50%">
+            <stop offset="0%" stop-color="#a855f7" stop-opacity="0.75"/>
+            <stop offset="40%" stop-color="#a855f7" stop-opacity="0.25"/>
+            <stop offset="100%" stop-color="#a855f7" stop-opacity="0"/>
+          </radialGradient>
+          <linearGradient id="gFlow1" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#00d4ff"/>
+            <stop offset="100%" stop-color="#22c55e"/>
+          </linearGradient>
+          <linearGradient id="gFlow2" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#22c55e"/>
+            <stop offset="100%" stop-color="#a855f7"/>
+          </linearGradient>
+          <pattern id="pGrid" width="40" height="40" patternUnits="userSpaceOnUse">
+            <path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e3a5f" stroke-width="0.5" opacity="0.6"/>
+          </pattern>
+          <filter id="fGlow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="4" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <filter id="fGlowStrong" x="-100%" y="-100%" width="300%" height="300%">
+            <feGaussianBlur stdDeviation="7" result="b"/>
+            <feMerge><feMergeNode in="b"/><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+          </filter>
+          <path id="pathA" d="M 170 240 C 250 180, 320 180, 400 240"/>
+          <path id="pathB" d="M 400 240 C 480 180, 550 180, 630 240"/>
+        </defs>
+
+        <rect width="800" height="450" fill="url(#gBg)"/>
+        <rect width="800" height="450" fill="url(#pGrid)">
+          <animate attributeName="opacity" values="0.25;0.65;0.25" dur="6s" repeatCount="indefinite"/>
+        </rect>
+
+        <!-- Anillos orbitales -->
+        <circle cx="400" cy="245" r="210" fill="none" stroke="#00d4ff" stroke-width="0.9" stroke-dasharray="4 8 12 8" opacity="0.45">
+          <animateTransform attributeName="transform" type="rotate" from="0 400 245" to="360 400 245" dur="42s" repeatCount="indefinite"/>
+          <animate attributeName="stroke-dashoffset" values="0;-72" dur="6s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="400" cy="245" r="168" fill="none" stroke="#22c55e" stroke-width="0.8" stroke-dasharray="2 6 10 6" opacity="0.4">
+          <animateTransform attributeName="transform" type="rotate" from="360 400 245" to="0 400 245" dur="58s" repeatCount="indefinite"/>
+          <animate attributeName="stroke-dashoffset" values="0;56" dur="8s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="400" cy="245" r="126" fill="none" stroke="#a855f7" stroke-width="0.7" stroke-dasharray="3 5 8 5" opacity="0.35">
+          <animateTransform attributeName="transform" type="rotate" from="0 400 245" to="360 400 245" dur="32s" repeatCount="indefinite"/>
+          <animate attributeName="stroke-dashoffset" values="0;-36" dur="4.5s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="400" cy="245" r="84" fill="none" stroke="#f59e0b" stroke-width="0.6" stroke-dasharray="1 4 7 4" opacity="0.3">
+          <animateTransform attributeName="transform" type="rotate" from="360 400 245" to="0 400 245" dur="24s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- Título -->
+        <g filter="url(#fGlow)">
+          <text x="400" y="52" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="26" font-weight="800" letter-spacing="3">
+            <tspan fill="#00d4ff">WEBS</tspan><tspan fill="#f59e0b"> ANIMADAS</tspan><tspan fill="#22c55e"> CON IA</tspan>
+            <animate attributeName="opacity" values="0.85;1;0.85" dur="4s" repeatCount="indefinite"/>
+          </text>
+        </g>
+        <text x="400" y="78" text-anchor="middle" font-family="Segoe UI, sans-serif" font-size="11" fill="#94a3b8" letter-spacing="4">
+          ANTIGRAVITY · GEMINI · CHATGPT
+          <animate attributeName="opacity" values="0.5;1;0.5" dur="3s" repeatCount="indefinite"/>
+        </text>
+
+        <!-- Flechas de flujo -->
+        <path d="M 170 240 C 250 180, 320 180, 400 240" fill="none" stroke="url(#gFlow1)" stroke-width="1.6" stroke-dasharray="7 7" opacity="0.75">
+          <animate attributeName="stroke-dashoffset" values="0;-28" dur="2s" repeatCount="indefinite"/>
+        </path>
+        <path d="M 400 240 C 480 180, 550 180, 630 240" fill="none" stroke="url(#gFlow2)" stroke-width="1.6" stroke-dasharray="7 7" opacity="0.75">
+          <animate attributeName="stroke-dashoffset" values="0;-28" dur="2.5s" repeatCount="indefinite"/>
+        </path>
+
+        <!-- Partículas viajeras -->
+        <circle r="3" fill="#00d4ff" filter="url(#fGlow)">
+          <animateMotion dur="3s" repeatCount="indefinite" rotate="auto"><mpath href="#pathA"/></animateMotion>
+          <animate attributeName="opacity" values="0;1;1;0" dur="3s" repeatCount="indefinite"/>
+        </circle>
+        <circle r="2.6" fill="#22c55e" filter="url(#fGlow)">
+          <animateMotion dur="3.6s" begin="0.7s" repeatCount="indefinite" rotate="auto"><mpath href="#pathA"/></animateMotion>
+          <animate attributeName="opacity" values="0;1;1;0" dur="3.6s" begin="0.7s" repeatCount="indefinite"/>
+        </circle>
+        <circle r="3" fill="#a855f7" filter="url(#fGlow)">
+          <animateMotion dur="3.2s" begin="0.35s" repeatCount="indefinite" rotate="auto"><mpath href="#pathB"/></animateMotion>
+          <animate attributeName="opacity" values="0;1;1;0" dur="3.2s" begin="0.35s" repeatCount="indefinite"/>
+        </circle>
+        <circle r="2.4" fill="#f59e0b" filter="url(#fGlow)">
+          <animateMotion dur="2.8s" begin="1.2s" repeatCount="indefinite" rotate="auto"><mpath href="#pathB"/></animateMotion>
+          <animate attributeName="opacity" values="0;1;1;0" dur="2.8s" begin="1.2s" repeatCount="indefinite"/>
+        </circle>
+
+        <!-- Ghost elements -->
+        <g opacity="0">
+          <animateMotion dur="9s" repeatCount="indefinite" rotate="auto"><mpath href="#pathA"/></animateMotion>
+          <animate attributeName="opacity" values="0;0.85;0.85;0" dur="9s" repeatCount="indefinite"/>
+          <rect x="-13" y="-11" width="26" height="22" rx="3" fill="none" stroke="#00d4ff" stroke-width="1.5"/>
+          <text x="0" y="3" text-anchor="middle" font-family="Segoe UI" font-size="9" fill="#00d4ff">IMG</text>
+        </g>
+        <g opacity="0">
+          <animateMotion dur="10s" begin="2s" repeatCount="indefinite" rotate="auto"><mpath href="#pathB"/></animateMotion>
+          <animate attributeName="opacity" values="0;0.85;0.85;0" dur="10s" begin="2s" repeatCount="indefinite"/>
+          <rect x="-13" y="-11" width="26" height="22" rx="3" fill="none" stroke="#22c55e" stroke-width="1.5"/>
+          <text x="0" y="3" text-anchor="middle" font-family="Segoe UI" font-size="9" fill="#22c55e">VID</text>
+        </g>
+
+        <!-- Nodo 1 -->
+        <g>
+          <circle cx="170" cy="240" r="60" fill="url(#gHaloCyan)" opacity="0.7">
+            <animate attributeName="opacity" values="0.4;0.9;0.4" dur="3s" repeatCount="indefinite"/>
+            <animate attributeName="r" values="55;68;55" dur="3s" repeatCount="indefinite"/>
+          </circle>
+          <g>
+            <animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" dur="4s" repeatCount="indefinite"/>
+            <circle cx="170" cy="240" r="38" fill="#0f172a" stroke="#00d4ff" stroke-width="2" filter="url(#fGlow)"/>
+            <circle cx="170" cy="240" r="38" fill="none" stroke="#00d4ff" stroke-width="1" opacity="0.6">
+              <animate attributeName="r" values="38;50;38" dur="3s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.6;0;0.6" dur="3s" repeatCount="indefinite"/>
+            </circle>
+            <text x="170" y="234" text-anchor="middle" font-family="Segoe UI" font-size="11" fill="#00d4ff" font-weight="800">IA</text>
+            <text x="170" y="248" text-anchor="middle" font-family="Segoe UI" font-size="7.5" fill="#94a3b8">CHATGPT · GEMINI</text>
+          </g>
+        </g>
+
+        <!-- Nodo 2 -->
+        <g>
+          <circle cx="400" cy="240" r="62" fill="url(#gHaloGreen)" opacity="0.7">
+            <animate attributeName="opacity" values="0.4;0.9;0.4" dur="3.5s" repeatCount="indefinite"/>
+            <animate attributeName="r" values="57;70;57" dur="3.5s" repeatCount="indefinite"/>
+          </circle>
+          <g>
+            <animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" dur="4.5s" repeatCount="indefinite"/>
+            <circle cx="400" cy="240" r="42" fill="#0f172a" stroke="#22c55e" stroke-width="2" filter="url(#fGlow)"/>
+            <circle cx="400" cy="240" r="42" fill="none" stroke="#22c55e" stroke-width="1" opacity="0.6">
+              <animate attributeName="r" values="42;56;42" dur="3.5s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.6;0;0.6" dur="3.5s" repeatCount="indefinite"/>
+            </circle>
+            <text x="400" y="234" text-anchor="middle" font-family="Segoe UI" font-size="11" fill="#22c55e" font-weight="800">FLOW</text>
+            <text x="400" y="248" text-anchor="middle" font-family="Segoe UI" font-size="7.5" fill="#94a3b8">VIDEO · LOOP</text>
+          </g>
+        </g>
+
+        <!-- Nodo 3 -->
+        <g>
+          <circle cx="630" cy="240" r="60" fill="url(#gHaloPurple)" opacity="0.7">
+            <animate attributeName="opacity" values="0.4;0.9;0.4" dur="4s" repeatCount="indefinite"/>
+            <animate attributeName="r" values="55;68;55" dur="4s" repeatCount="indefinite"/>
+          </circle>
+          <g>
+            <animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" dur="5s" repeatCount="indefinite"/>
+            <circle cx="630" cy="240" r="38" fill="#0f172a" stroke="#a855f7" stroke-width="2" filter="url(#fGlow)"/>
+            <circle cx="630" cy="240" r="38" fill="none" stroke="#a855f7" stroke-width="1" opacity="0.6">
+              <animate attributeName="r" values="38;50;38" dur="4s" repeatCount="indefinite"/>
+              <animate attributeName="opacity" values="0.6;0;0.6" dur="4s" repeatCount="indefinite"/>
+            </circle>
+            <text x="630" y="234" text-anchor="middle" font-family="Segoe UI" font-size="11" fill="#a855f7" font-weight="800">CODE</text>
+            <text x="630" y="248" text-anchor="middle" font-family="Segoe UI" font-size="7.5" fill="#94a3b8">ANTIGRAVITY</text>
+          </g>
+        </g>
+
+        <!-- LIVE indicator -->
+        <g transform="translate(720, 38)">
+          <circle r="5" fill="#ef4444">
+            <animate attributeName="opacity" values="1;0.15;1" dur="1.2s" repeatCount="indefinite"/>
+          </circle>
+          <circle r="5" fill="none" stroke="#ef4444" stroke-width="1.5">
+            <animate attributeName="r" values="5;14;5" dur="1.2s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="1;0;1" dur="1.2s" repeatCount="indefinite"/>
+          </circle>
+          <text x="12" y="4" font-family="Segoe UI" font-size="10" fill="#ef4444" font-weight="800" letter-spacing="1.5">LIVE</text>
+        </g>
+
+        <!-- Etiquetas de estado alternando -->
+        <g transform="translate(80, 400)">
+          <text font-family="Consolas, monospace" font-size="9" fill="#64748b" letter-spacing="1.5">
+            <tspan>
+              <animate attributeName="opacity" values="1;0;0;1" keyTimes="0;0.33;0.66;1" dur="6s" repeatCount="indefinite"/>
+              ● PROMPT → IMAGEN
+            </tspan>
+          </text>
+        </g>
+        <g transform="translate(300, 400)">
+          <text font-family="Consolas, monospace" font-size="9" fill="#22c55e" letter-spacing="1.5">
+            <tspan>
+              <animate attributeName="opacity" values="0;1;0;0" keyTimes="0;0.33;0.66;1" dur="6s" repeatCount="indefinite"/>
+              ● IMAGEN → VIDEO
+            </tspan>
+          </text>
+        </g>
+        <g transform="translate(520, 400)">
+          <text font-family="Consolas, monospace" font-size="9" fill="#a855f7" letter-spacing="1.5">
+            <tspan>
+              <animate attributeName="opacity" values="0;0;1;0" keyTimes="0;0.33;0.66;1" dur="6s" repeatCount="indefinite"/>
+              ● VIDEO → CÓDIGO
+            </tspan>
+          </text>
+        </g>
+
+        <!-- Firma -->
+        <text x="400" y="430" text-anchor="middle" font-family="Segoe UI" font-size="9" fill="#00d4ff" opacity="0.65" letter-spacing="2.5">
+          RUBÉN SBARSKY · 2026
+          <animate attributeName="opacity" values="0.3;0.85;0.3" dur="5s" repeatCount="indefinite"/>
+        </text>
+
+        <!-- Corner brackets -->
+        <g stroke="#00d4ff" stroke-width="1.5" fill="none" opacity="0.55">
+          <path d="M 15 32 L 15 15 L 32 15"/>
+          <path d="M 785 32 L 785 15 L 768 15"/>
+          <path d="M 15 418 L 15 435 L 32 435"/>
+          <path d="M 785 418 L 785 435 L 768 435"/>
+        </g>
+      </svg>
+    </div>
+
+    <span class="badge blue">TUTORIAL TÉCNICO · IA + DISEÑO WEB</span>
+    <h1>Crear Webs Animadas en Minutos con IA</h1>
+    <p style="font-size:15px;color:var(--muted);margin-bottom:18px">
+      Antigravity + Gemini + ChatGPT · Guía completa paso a paso para construir experiencias web cinemáticas con scrollytelling, video en bucle y canvas frame-by-frame.
+    </p>
+
+    <div class="quote">
+      "Si no puedes explicarlo de forma sencilla, es que no lo entiendes lo suficientemente bien."
+    </div>
+
+    <div class="metrics">
+      <div class="metric"><span class="num">26</span><span class="lbl">Prompts</span></div>
+      <div class="metric"><span class="num">8</span><span class="lbl">Capítulos</span></div>
+      <div class="metric"><span class="num">3</span><span class="lbl">IAs Coordinadas</span></div>
+      <div class="metric"><span class="num">~90'</span><span class="lbl">Tiempo Total</span></div>
+    </div>
+
+    <div class="hero-meta">
+      <span>👨‍💻 <strong>Rubén Sbarsky</strong></span>
+      <span>📅 27/09/2026</span>
+      <span>🕐 04:22:16</span>
+      <span>📚 Documentación educativa</span>
+    </div>
+
+    <div class="callout info" style="margin-top:18px">
+      <span class="lbl">Punto de partida</span>
+      Este tutorial transforma una página web estática en una <strong>experiencia inmersiva</strong> donde el usuario interactúa activamente a través del scroll. Coordinarás tres inteligencias artificiales especializadas: <code>ChatGPT/Gemini</code> para dirección de arte, <code>Google Flow</code> para animación cinemática y <code>Antigravity</code> para generación de código frontend.
+    </div>
+  </div>
+</section>
+
+<!-- ================= INTRODUCCIÓN ================= -->
+<section id="intro" class="section">
+  <span class="badge blue">INTRODUCCIÓN GENERAL</span>
+  <h2>La Nueva Era del Diseño Web Animado</h2>
+
+  <div class="card">
+    <h3>¿Qué es este tema y para qué sirve?</h3>
+    <p>Crear webs animadas con inteligencia artificial consiste en utilizar asistentes avanzados de IA —como <strong>ChatGPT</strong>, <strong>Gemini</strong>, <strong>Antigravity</strong> y <strong>Google Flow</strong>— para concebir, diseñar, animar y programar experiencias web interactivas de nivel profesional.</p>
+    <p>Sirve para transformar una página web estática y aburrida en una <strong>experiencia inmersiva</strong> donde el usuario no solo lee información, sino que <strong>interactúa activamente</strong> a través del desplazamiento (<em>scroll</em>). En lugar de escribir miles de líneas de código CSS o JavaScript manualmente durante semanas, coordinas distintos modelos de IA para que generen las imágenes, redacten la estructura del código y produzcan los videos cinemáticos necesarios.</p>
+
+    <div class="diagram">
+<pre>  ┌─────────────────┐       ┌─────────────────┐       ┌─────────────────┐
+  │  1. CHATGPT /   │       │ 2. GOOGLE FLOW  │       │ 3. ANTIGRAVITY  │
+  │     GEMINI      │ ────> │   (VIDEO/LOOP)  │ ────> │ (CÓDIGO/CANVAS) │
+  │ (Dirección Art) │       │ (Animación 3D)  │       │  (Scrollytelling)│
+  └─────────────────┘       └─────────────────┘       └─────────────────┘</pre>
+    </div>
+  </div>
+
+  <h2>¿Por qué es importante aprenderlo hoy?</h2>
+  <div class="card-grid">
+    <div class="card">
+      <span class="badge amber">Diferenciación</span>
+      <h4>Diferenciación profesional</h4>
+      <p>El mercado web está saturado de plantillas genéricas. Las webs interactivas cinemáticas (estilo <em>Awwwards</em>) suelen venderse por miles de dólares.</p>
+    </div>
+    <div class="card">
+      <span class="badge green">Velocidad</span>
+      <h4>Reducción radical de tiempos</h4>
+      <p>Un proyecto que antes requería un equipo de diseñadores 3D y desarrolladores <em>frontend</em> durante un mes, ahora se construye en cuestión de minutos u horas.</p>
+    </div>
+    <div class="card">
+      <span class="badge purple">Accesibilidad</span>
+      <h4>Democratización del desarrollo</h4>
+      <p>Ya no necesitas ser un programador sénior para construir animaciones complejas basadas en fotogramas o bucles continuos (<em>loops</em>).</p>
+    </div>
+  </div>
+
+  <h2>¿En qué situaciones reales se utiliza?</h2>
+  <div class="card">
+    <ol>
+      <li><strong>Páginas de aterrizaje (Landing Pages) para marcas Premium:</strong> Lanzamientos de productos exclusivos donde se busca impactar al visitante desde el primer segundo.</li>
+      <li><strong>Webs para Agencias de Viajes y Turismo:</strong> Experiencias donde el usuario siente que "viaja" a través de la pantalla mientras se desplaza.</li>
+      <li><strong>Portafolios de Diseñadores y Creadores:</strong> Páginas personales que demuestran un dominio técnico vanguardista.</li>
+      <li><strong>Presentaciones interactivas de producto:</strong> Marcas de tecnología o moda que requieren mostrar vistas de 360 grados de sus artículos.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ================= COMPARATIVA ================= -->
+<section id="comp" class="section">
+  <span class="badge blue">CUADRO COMPARATIVO</span>
+  <h2>Desarrollo Tradicional vs. Flujo Asistido por IA</h2>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Criterio</th>
+          <th>Método Tradicional</th>
+          <th>Método Asistido por IA</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Modelado y Animación 3D</strong></td>
+          <td>Requiere software complejo (Blender, Maya) y semanas de renderizado.</td>
+          <td>Generación por prompt en minutos mediante <strong>Google Flow / ChatGPT</strong>.</td>
+        </tr>
+        <tr>
+          <td><strong>Programación Frontend</strong></td>
+          <td>Cientos de líneas manuales en HTML, CSS y JS con librerías pesadas.</td>
+          <td>Estructura en un único <code>index.html</code> autogenerado por <strong>Antigravity</strong>.</td>
+        </tr>
+        <tr>
+          <td><strong>Tiempo de Desarrollo</strong></td>
+          <td>3 a 6 semanas de trabajo intensivo.</td>
+          <td>De 30 a 90 minutos.</td>
+        </tr>
+        <tr>
+          <td><strong>Costo de Producción</strong></td>
+          <td>Elevado (múltiples especialistas necesarios).</td>
+          <td>Prácticamente nulo o enfocado en herramientas IA.</td>
+        </tr>
+        <tr>
+          <td><strong>Flexibilidad de Cambio</strong></td>
+          <td>Rehacer un render 3D implica días de retraso.</td>
+          <td>Se ajusta la instrucción en texto (<em>prompt</em>) y se regenera en segundos.</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="callout tip">
+    <span class="lbl">Conclusión clave</span>
+    El flujo asistido por IA no elimina la necesidad de criterio: la transforma. Ahora el rol dominante es la <strong>dirección creativa</strong>, no la ejecución técnica repetitiva.
+  </div>
+</section>
+
+<!-- ================= CAP 1 ================= -->
+<section id="cap1" class="section">
+  <span class="badge blue">CAPÍTULO 1</span>
+  <h2>Fundamentos y Conceptos Clave</h2>
+  <p style="color:var(--muted)">Sin dar nada por supuesto. Para aprovechar este tutorial no necesitas experiencia previa en programación ni en diseño 3D. Sin embargo, es necesario comprender cuatro conceptos esenciales.</p>
+
+  <div class="acc open">
+    <div class="acc-head">1. Scroll-telling (o Scrollytelling)</div>
+    <div class="acc-body">
+      <p><strong>Explicación sencilla:</strong> Es la técnica de contar una historia visualmente a medida que el usuario desliza la página hacia abajo.</p>
+      <p><strong>Analogía cotidiana:</strong> Imagina un libro desplegable infantil. Al pasar la página (hacer <em>scroll</em>), las figuras tridimensionales se mueven, la maleta se abre y el escenario cambia.</p>
+      <div class="callout example">
+        <span class="lbl">Caso práctico</span>
+        Al hacer <em>scroll</em>, una maleta cerrada se va abriendo gradualmente hasta introducir la cámara en su interior y revelar distintas ciudades del mundo.
+      </div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-head">2. Secuencia de Fotogramas en Canvas</div>
+    <div class="acc-body">
+      <p><strong>Explicación sencilla:</strong> En lugar de reproducir un video normal con botón de <em>play</em>, el video se descompone en cientos de imágenes individuales (fotogramas). La posición del <em>scroll</em> controla qué imagen se muestra en cada instante.</p>
+      <p><strong>Analogía cotidiana:</strong> Como un folioscopio (<em>flipbook</em>): si pasas las hojas rápido con el pulgar, ves la animación; si te detienes en la hoja 20, la animación se congela ahí.</p>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-head">3. Seamless Loop (Bucle Continuo Perfecto)</div>
+    <div class="acc-body">
+      <p><strong>Explicación sencilla:</strong> Un video corto cuyo último fotograma coincide exactamente con el primero, logrando que se repita infinitamente sin saltos ni cortes visibles.</p>
+      <p><strong>Analogía cotidiana:</strong> Un carrusel de caballitos que gira de forma constante. No se nota cuándo termina una vuelta y empieza la siguiente.</p>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-head">4. Prompting Visual y Agentes de Código</div>
+    <div class="acc-body">
+      <p><strong>Explicación sencilla:</strong> Comunicarte con la IA mediante instrucciones en lenguaje natural (texto), explicándole exactamente qué quieres que dibuje o qué código debe modificar.</p>
+      <p><strong>Analogía cotidiana:</strong> Darle instrucciones al director de arte de una película: <em>"Haz que la luz sea más suave y mueve el título dos centímetros hacia arriba"</em>.</p>
+    </div>
+  </div>
+
+  <h3>Resumen del Capítulo 1</h3>
+  <div class="card">
+    <ul>
+      <li>El <em>scrollytelling</em> conecta el desplazamiento del usuario con la narrativa visual de la web.</li>
+      <li>La conversión de video a fotogramas permite controlar el tiempo de animación con el ratón o el dedo.</li>
+      <li>Un bucle continuo (<em>seamless loop</em>) le da vida al fondo principal sin generar distracciones.</li>
+      <li>Las herramientas de IA ejecutan la parte pesada (gráfica y código); tu rol es la <strong>dirección creativa</strong>.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= CAP 2 ================= -->
+<section id="cap2" class="section">
+  <span class="badge green">CAPÍTULO 2 · FASE 1</span>
+  <h2>Dirección Creativa y Generación de Assets de Alto Impacto</h2>
+  <p style="color:var(--muted)">En esta fase utilizaremos <strong>ChatGPT</strong> y <strong>Gemini</strong> para definir el concepto estético e instruir la generación de la imagen base que servirá de pilar para todo el proyecto.</p>
+
+  <div class="diagram">
+<pre>  Pinterest (Búsqueda) ──> ChatGPT (Generación 16:9) ──> Ajuste de Composición ──> Imagen Hero Definitiva</pre>
+  </div>
+
+  <div class="step">
+    <div class="step-num">1</div>
+    <div class="step-body">
+      <h4>Paso 1: Búsqueda y Selección de la Referencia Visual</h4>
+      <p><strong>Qué hacer:</strong> Busca en plataformas visuales (como Pinterest) referencias con la estética deseada. En este caso, buscamos <em>"travel agency"</em>.</p>
+      <p><strong>Por qué hacerlo:</strong> La IA trabaja mejor cuando le proporcionas una dirección clara sobre colores, iluminación y disposición espacial.</p>
+      <div class="callout warn">
+        <span class="lbl">Error común</span>
+        Confiar únicamente en texto abstracto sin tener una imagen de referencia clara mental o digital.
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">2</div>
+    <div class="step-body">
+      <h4>Paso 2: Generación de la Imagen Hero Inicial en ChatGPT</h4>
+      <p><strong>Qué hacer:</strong> Proporciona a ChatGPT/DALL-E un prompt específico para crear la escena base en formato panorámico cinemático.</p>
+      <div class="prompt">
+        <div class="ptext">"Crea una imagen en relación de aspecto 16:9, en alta calidad, sin elementos de interfaz (UI), sin textos, con estilo cinematográfico y basada en el concepto de una maleta protagonista con elementos de viaje alrededor."</div>
+      </div>
+      <p><strong>Por qué hacerlo:</strong> Necesitamos una imagen limpia (sin botones ni letras) para que Antigravity pueda superponer la interfaz HTML de forma limpia.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">3</div>
+    <div class="step-body">
+      <h4>Paso 3: Ajuste de Composición y Espacio Negativo</h4>
+      <p><strong>Qué hacer:</strong> Si el objeto principal (la maleta) queda muy centrado o tapa la zona donde irá el título principal, solicita una corrección de composición.</p>
+      <div class="prompt p2">
+        <div class="ptext">"Deja más espacio libre en la parte superior para colocar un título. Reduce la escala de la maleta un 10% acercándola más al borde inferior, y haz que el cielo tenga un tono celeste más uniforme, sin un brillo blanco tan saturado."</div>
+      </div>
+      <div class="ba-grid">
+        <div class="no">Una maleta gigante ocupando el centro de la pantalla que tapa el texto del menú.</div>
+        <div class="yes">Una maleta ubicada en el tercio inferior, dejando el tercio superior despejado para el gran titular.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">4</div>
+    <div class="step-body">
+      <h4>Paso 4: Generación de la Versión Definitiva</h4>
+      <p><strong>Qué hacer:</strong> Solicita la versión final con iluminación y contraste optimizados.</p>
+      <div class="prompt p2">
+        <div class="ptext">"Genera una nueva versión más cinemática, con mejor contraste e iluminación; esta será la definitiva."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">5</div>
+    <div class="step-body">
+      <h4>Paso 5: Definición del Concepto de Hero Limpio para el Bucle</h4>
+      <p><strong>Qué hacer:</strong> Separar la escena estática/bucle inicial de la secuencia compleja de viaje. Si la primera sección tiene demasiados elementos dinámicos (como aviones volando), al hacer el bucle (<em>loop</em>) se verá extraño.</p>
+      <div class="prompt p2">
+        <div class="ptext">"Me gusta la secuencia de viaje, pero la utilizaré más adelante en la web. Para la cabecera principal (hero section) necesito una imagen con un concepto similar pero diseñada para un bucle continuo. Dame tres propuestas donde la maleta sea la protagonista sobre un fondo limpio y minimalista, dejando suficiente espacio negativo arriba para el título. No incluyas aviones, globos ni elementos que queden extraños al intentar animarlos en loop."</div>
+      </div>
+      <div class="prompt p2">
+        <div class="ptext">"Dame una propuesta con la maleta en un fondo mucho más limpio: una terraza minimalista frente al mar, con suelo reflectante liso y horizonte despejado. Deja bastante espacio negativo arriba para el título y genera la imagen en alta calidad y estilo cinematográfico."</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Checklist de Calidad de Imagen</h3>
+  <ul class="checklist">
+    <li>Relación de aspecto 16:9 estricta.</li>
+    <li>Cero textos o botones incrustados en la imagen.</li>
+    <li>Espacio libre superior (cielo/pared) de al menos el 30% de la altura.</li>
+    <li>Sin elementos voladores que arruinen un bucle continuo de animación.</li>
+  </ul>
+
+  <h3>Resumen del Capítulo 2</h3>
+  <div class="card">
+    <ul>
+      <li>Las referencias visuales previas ahorran iteraciones fallidas.</li>
+      <li>Siempre debes pedir imágenes libres de elementos de interfaz gráfica (sin textos ni botones).</li>
+      <li>El espacio negativo es indispensable para colocar la tipografía web.</li>
+      <li>Separar la escena de cabecera (sencilla y continua) de la secuencia compleja facilita el éxito del proyecto.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= CAP 3 ================= -->
+<section id="cap3" class="section">
+  <span class="badge amber">CAPÍTULO 3 · FASE 2</span>
+  <h2>Generación de Video y Animación Frame-by-Frame</h2>
+  <p style="color:var(--muted)">En esta etapa transformaremos nuestras imágenes estáticas en un recorrido cinemático mediante <strong>Google Flow</strong> y prompts especializados de video.</p>
+
+  <div class="step">
+    <div class="step-num">6</div>
+    <div class="step-body">
+      <h4>Paso 6: Redacción del Prompt para el Plano Secuencia de Viaje</h4>
+      <p><strong>Qué hacer:</strong> Pide a ChatGPT un prompt técnico detallado en inglés para modelos de generación de video (como Google Flow), describiendo el movimiento de la cámara.</p>
+      <div class="prompt p3">
+        <div class="ptext">"Genera un prompt detallado para crear un video en plano secuencia: la maleta debe abrirse suavemente hacia la cámara y, en lugar de ropa, revelar un mundo cinematográfico en su interior. La cámara debe avanzar rápidamente, entrar por dentro de la maleta y desembocar a pie de calle en una gran ciudad moderna. Desde allí, mediante una transición fluida y a alta velocidad, debe atravesar una segunda, tercera y cuarta ciudad del mundo antes de frenar. Debe transmitir una sensación de viaje dinámico, iluminación realista, profundidad y sin cortes visibles ni textos."</div>
+      </div>
+      <p><strong>Por qué hacerlo:</strong> Las herramientas de video por IA responden con mucha mayor precisión a términos cinemáticos específicos ("plano secuencia", "cámara avanza", "transición fluida").</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">7</div>
+    <div class="step-body">
+      <h4>Paso 7: Generación y Descarga del Video en Google Flow</h4>
+      <p><strong>Qué hacer:</strong> Ingresa a Google Flow, sube la imagen de la maleta como referencia de origen, pega el prompt en inglés obtenido y genera el video. Descarga el archivo de video resultante directamente dentro de la carpeta local de tu proyecto.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">8</div>
+    <div class="step-body">
+      <h4>Paso 8: Generación del Video en Bucle Continuo (360° Loop) para la Sección Hero</h4>
+      <p><strong>Qué hacer:</strong> Genera la animación en loop para la maleta sobre la terraza que servirá de fondo en la cabecera principal.</p>
+      <div class="prompt p3">
+        <div class="ptext">"Genera un prompt de video para animar esta imagen en bucle perfecto (seamless loop) de 6 a 8 segundos. La cámara debe mantenerse estática mientras la maleta azul gira 360 grados sobre su eje vertical a velocidad constante, regresando exactamente a su posición inicial. Añade movimiento sutil del viento en las ramas y la cortina, junto con leves ondas en el agua y reflejos en el suelo. Sin cortes ni cambios de escala."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">9</div>
+    <div class="step-body">
+      <h4>Paso 9: Ajuste Fino y Cierre del Bucle (Seamless Loop)</h4>
+      <p><strong>Qué hacer:</strong> Si al probar el video notas que el punto de inicio y el de fin no encajan a la perfección, aplica este prompt de ajuste en Google Flow.</p>
+      <div class="prompt p3">
+        <div class="ptext">"Genera la animación de nuevo. Puedes reducir la duración a menos segundos si es necesario, pero asegura un bucle continuo perfecto (seamless loop). Presta especial atención al asa de la maleta para que termine exactamente en la misma posición y orientación en la que comienza."</div>
+      </div>
+      <div class="diagram">
+<pre>  ┌─────────────────────────────────────────────────────────┐
+  │                 CICLO DE BUCLE PERFECTO                 │
+  │  Fotograma 001 (Inicio)  <--->  Fotograma 180 (Final)   │
+  │  [Posición idéntica del asa, luz y ángulo de cámara]    │
+  └─────────────────────────────────────────────────────────┘</pre>
+      </div>
+    </div>
+  </div>
+
+  <h3>Errores Frecuentes y Soluciones</h3>
+  <div class="card-grid">
+    <div class="card">
+      <span class="badge red">Error</span>
+      <h4>La animación tiembla o cambia de escala a mitad del video</h4>
+      <p><strong>Solución:</strong> Asegúrate de incluir <em>"cámara estática"</em> y <em>"sin cambios de escala"</em> en el prompt.</p>
+    </div>
+    <div class="card">
+      <span class="badge red">Error</span>
+      <h4>El bucle da un "salto" al terminar</h4>
+      <p><strong>Solución:</strong> Solicita reducir la duración a 4-6 segundos y enfatiza que la posición final del elemento clave (el asa) sea 100% idéntica a la inicial.</p>
+    </div>
+  </div>
+
+  <h3>Resumen del Capítulo 3</h3>
+  <div class="card">
+    <ul>
+      <li>Los textos de dirección de cámara cinemática le indican a la IA exactamente cómo mover la lente.</li>
+      <li>El video del <em>scrollytelling</em> requiere un avance frontal continuo hacia el objetivo.</li>
+      <li>El video de la cabecera (<em>hero</em>) debe mantenerse en el mismo eje para permitir un bucle infinito fluido.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= CAP 4 ================= -->
+<section id="cap4" class="section">
+  <span class="badge purple">CAPÍTULO 4 · FASE 3</span>
+  <h2>Ensamblado y Programación Asistida con IA en Antigravity</h2>
+  <p style="color:var(--muted)"><strong>Antigravity</strong> actuará como nuestro agente de programación inteligente. Nos creará un archivo limpio <code>index.html</code> con todo el CSS y JavaScript integrado, sin necesidad de instalar entornos de desarrollo complejos ni librerías pesadas.</p>
+
+  <div class="step">
+    <div class="step-num">10</div>
+    <div class="step-body">
+      <h4>Paso 10: Estructuración Inicial del Código Base</h4>
+      <div class="prompt p3">
+        <div class="ptext">"Construye un archivo index.html único y listo para producción (con CSS y JS inline), utilizando la tipografía Poppins y sin librerías externas. Adapta el copy para una agencia de viajes moderna, utilizando la imagen adjunta como fondo de la sección hero."</div>
+      </div>
+      <p><strong>Por qué hacerlo:</strong> Mantener todo el código en un único archivo previene errores de rutas y facilita la publicación inmediata.</p>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">11</div>
+    <div class="step-body">
+      <h4>Paso 11: Ajuste de Posición, Tipografía y Contraste</h4>
+      <div class="prompt p3">
+        <div class="ptext">"Analiza la imagen y reubica los elementos: sube el título para que quede en el cielo, justo encima de la maleta, y ajusta los colores de la tipografía para garantizar un contraste óptimo con el fondo."</div>
+      </div>
+      <div class="prompt p3">
+        <div class="ptext">"Centra el titular y el subtítulo, ubicando el botón de acción debajo. El titular debe ser grande y con una tipografía moderna. Alinea el header y el footer en la misma dirección y añade detalles sutiles de alta calidad en las esquinas, manteniendo una estética editorial estilo Awwwards."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">12</div>
+    <div class="step-body">
+      <h4>Paso 12: Integración de Plantilla Editorial Avanzada (Estilo "Ruta Salina")</h4>
+      <p><strong>Qué hacer:</strong> Para lograr una apariencia de diseño galardonado, aplica reglas estrictas de diagramación, tipografías combinadas y espacios.</p>
+      <div class="prompt p3">
+        <div class="ptext">"Crea una sección hero basándote en la siguiente especificación de diseño:
+• Márgenes laterales de 24 px.
+• Título principal centrado a 120 px del borde superior: «Aventura sin bordes. / Regresa con historias.», con la segunda línea en blanco al 55% de opacidad. Tipografía con clamp(64px, 5.4vw, 72px), interlineado 1.1 y espaciado de -0.02em.
+• En la parte inferior, un párrafo descriptivo de 14-15 px y ancho máximo de 384 px: «Rutas trazadas a mano por guías locales. Sin multitudes, sin guion, sin bordes.»
+• A la derecha, añade el indicador «EDICIÓN 2026 · 12 DESTINOS» y botón de vidrio «EMPEZAR A RODAR».
+• En dispositivos móviles, oculta los enlaces secundarios centrales y apila el contenido del pie de forma vertical.
+• Fuentes requeridas: Inter (peso 400 para titulares) y Barlow (para interfaz y cuerpo)."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">13</div>
+    <div class="step-body">
+      <h4>Paso 13: Reemplazo del Fondo Hero por el Video en Bucle</h4>
+      <div class="prompt p3">
+        <div class="ptext">"Reemplaza el fondo de la sección principal por el video de la maleta en loop que acabo de añadir en la carpeta del proyecto. Asegúrate de que se reproduzca en bucle continuo de forma automática y fluida."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">14</div>
+    <div class="step-body">
+      <h4>Paso 14: Implementación del Scroll-telling mediante Fotogramas (Canvas)</h4>
+      <div class="prompt p3">
+        <div class="ptext">"En la carpeta del proyecto, implementa el video que te acabo de dejar para crear una experiencia de scrollytelling. Extrae el video como una secuencia de fotogramas y móntalo en un canvas interactivo, de modo que el usuario avance por las secciones y el contenido de la web a medida que hace scroll."</div>
+      </div>
+      <div class="diagram">
+<pre>  ┌──────────────────────────────────────────────────────────┐
+  │                 MECANISMO DE CANVAS Y SCROLL             │
+  │  Scroll en 0%   ──> Muestra Fotograma 001 (Maleta)      │
+  │  Scroll en 50%  ──> Muestra Fotograma 120 (Entrada)     │
+  │  Scroll en 100% ──> Muestra Fotograma 240 (Ciudad)      │
+  └──────────────────────────────────────────────────────────┘</pre>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">15</div>
+    <div class="step-body">
+      <h4>Paso 15: Suavizado de Zoom, Transiciones y Fade Out</h4>
+      <div class="prompt p3">
+        <div class="ptext">"Al deslizar hacia abajo, la pantalla debe realizar un zoom progresivo hacia la maleta; esta debe abrirse y dar paso secuencial a 3 o 4 destinos mundiales a pantalla completa."</div>
+      </div>
+      <div class="prompt p3">
+        <div class="ptext">"Suaviza la curva de aceleración con una transición CSS o interpolación lineal (lerp). Haz que el titular principal haga un desvanecimiento (fade out con opacity: 0) y se eleve ligeramente a medida que el scroll avanza del 0% al 15%. Asegura que el foco del zoom coincida exactamente con el centro de la maleta (transform-origin)."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">16</div>
+    <div class="step-body">
+      <h4>Paso 16: Legibilidad con Overlays y Animación de Textos</h4>
+      <div class="prompt p3">
+        <div class="ptext">"Añade viñetas oscuras degradadas (vignette overlays) sutiles en la parte superior e inferior de cada diapositiva para asegurar legibilidad. Ajusta la entrada de los textos para que aparezcan con un efecto de revelado por máscara o un desplazamiento vertical retardado respecto a la imagen."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">17</div>
+    <div class="step-body">
+      <h4>Paso 17: Elementos de Navegación e Interfaz Flotante</h4>
+      <div class="prompt p3">
+        <div class="ptext">"Integra una barra de progreso de scroll en el lateral o pie de página, un indicador interactivo que cambie de número según el destino visible (01/03, 02/03, 03/03), y un botón call-to-action flotante discretamente integrado ('Explorar ruta' o 'Reservar')."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">18</div>
+    <div class="step-body">
+      <h4>Paso 18: Optimización Responsive mediante clamp()</h4>
+      <div class="prompt p3">
+        <div class="ptext">"Ajusta los tamaños de fuente utilizando clamp() y asegura que la maleta se mantenga siempre visible y centrada en vertical, independientemente de la relación de aspecto del monitor."</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">19</div>
+    <div class="step-body">
+      <h4>Paso 19: Pulido Visual, Depuración y Limpieza Final</h4>
+      <div class="prompt p3">
+        <div class="ptext">"La segunda sección quedó muy compacta; dale mayor altura y más espacio vertical para que respire. Crea también una sección final después de la secuencia de imágenes del viaje, que sea amplia, minimalista y mantenga la coherencia visual con la sección hero. Reduce además el exceso de textos decorativos para no saturar la vista."</div>
+      </div>
+      <div class="prompt p3">
+        <div class="ptext">"Elimina todos los puntos azules flotantes con texto y los textos secundarios que los acompañan a los lados; dejan la interfaz recargada y distraen del recorrido visual. Elimina también los botones que dicen 'Empezar a rodar' o 'A rodar', conservando únicamente la navegación principal limpia."</div>
+      </div>
+      <div class="prompt p3">
+        <div class="ptext">"Cambia los fondos claros de las secciones intermedias por el tono oscuro de la sección final. Esto evitará saltos de color bruscos durante el scroll, ya que la secuencia de la ciudad dentro de la maleta tiene una atmósfera nocturna predominante."</div>
+      </div>
+      <div class="prompt p3">
+        <div class="ptext">"Ajusta el titular principal («Aventura sin bordes. Regresa con historias»): haz que ambas líneas compartan el mismo tono de blanco al 100% de opacidad, junta un poco más el interlineado entre ellas y sube el bloque completo un par de píxeles hacia arriba."</div>
+      </div>
+      <div class="prompt p3">
+        <div class="ptext">"La transición hacia la secuencia de imágenes se siente muy dura. Aplica una máscara de degradado (overlay con gradiente superior) sobre el contenedor del canvas para que el inicio de la animación se funda de manera gradual y natural con la sección anterior."</div>
+      </div>
+      <div class="prompt p3">
+        <div class="ptext">"Elimina estilos redundantes y optimiza el script inline dentro del index.html. Confirma que las fuentes de Google Fonts carguen de forma asíncrona sin bloquear el renderizado de la página."</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Resumen del Capítulo 4</h3>
+  <div class="card">
+    <ul>
+      <li>La estructura en un archivo único <code>index.html</code> facilita el control por parte de la IA.</li>
+      <li><code>clamp()</code> permite que los textos se escalen proporcionalmente sin romper el diseño.</li>
+      <li>La interpolación lineal (lerp) elimina la rigidez del scroll del ratón.</li>
+      <li>La unificación de fondos oscuros evita parpadeos de luz que arruinan la inmersión cinemática.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= CAP 5 ================= -->
+<section id="cap5" class="section">
+  <span class="badge blue">CAPÍTULO 5 · FASE 4</span>
+  <h2>Despliegue, Publicación y Pruebas en Vivo (Hostinger)</h2>
+  <p style="color:var(--muted)">Llegó el momento de verificar el comportamiento de la web e independizarla de nuestro equipo local para compartirla con clientes o incluirla en nuestro portafolio.</p>
+
+  <div class="step">
+    <div class="step-num">20</div>
+    <div class="step-body">
+      <h4>Paso 20: Pruebas Responsive en el Navegador</h4>
+      <p><strong>Qué hacer:</strong> Abre las herramientas de desarrollador (<em>Developer Tools</em>) en Chrome o Firefox (<code>F12</code> o <code>Cmd+Option+I</code>).</p>
+      <ol>
+        <li>Cambia la vista a dispositivos móviles (iPhone 14/15, Samsung Galaxy, iPad).</li>
+        <li>Verifica que el video de fondo se reproduzca correctamente en pantallas verticales.</li>
+        <li>Asegúrate de que el titular no quede cortado en los bordes.</li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">21</div>
+    <div class="step-body">
+      <h4>Paso 21: Subida de Archivos en Hostinger</h4>
+      <p><strong>Qué hacer:</strong> Publica la web en Hostinger utilizando un panel de gestión de archivos o FTP.</p>
+      <ol>
+        <li>Inicia sesión en tu cuenta de Hostinger (puedes usar el enlace con descuento oficial: <a href="https://hostinger.com/rodrigo?utm_source=gemini" target="_blank" rel="noopener">hostinger.com/rodrigo</a>).</li>
+        <li>Entra al <strong>Administrador de Archivos</strong> (<em>File Manager</em>) del dominio o subdominio temporal asignado.</li>
+        <li>Navega a la carpeta pública <code>public_html</code>.</li>
+        <li>Sube los siguientes elementos:
+          <ul>
+            <li>El archivo <code>index.html</code>.</li>
+            <li>Los archivos de video (<code>.mp4</code> / <code>.webm</code>).</li>
+            <li>La carpeta que contiene la secuencia de fotogramas procesada.</li>
+            <li>La imagen estática de respaldo.</li>
+          </ul>
+        </li>
+      </ol>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-num">22</div>
+    <div class="step-body">
+      <h4>Paso 22: Validación en Vivo y Rendimiento</h4>
+      <p><strong>Qué hacer:</strong> Abre la URL pública desde tu teléfono móvil y desde tu ordenador.</p>
+      <p><strong>Comprobaciones finales:</strong></p>
+      <ul>
+        <li>¿El desplazamiento es suave?</li>
+        <li>¿El video en bucle carga sin demoras?</li>
+        <li>¿Los textos son legibles bajo cualquier iluminación de pantalla?</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Resumen del Capítulo 5</h3>
+  <div class="card">
+    <ul>
+      <li>La emulación móvil previa en el navegador ahorra errores en producción.</li>
+      <li>Subir todos los assets con la misma estructura de carpetas garantiza que no se rompan las rutas de video.</li>
+      <li>Utilizar Hostinger permite obtener certificados SSL rápidos y alta velocidad de entrega para archivos pesados de video y canvas.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ================= CAP 6 ================= -->
+<section id="cap6" class="section">
+  <span class="badge purple">CAPÍTULO 6</span>
+  <h2>Recopilatorio Completo de Prompts del Proyecto</h2>
+  <p style="color:var(--muted)">Colección exacta de los <strong>26 prompts</strong> utilizados a lo largo de todo el ciclo de desarrollo para replicar el proyecto paso a paso.</p>
+
+  <div class="diagram">
+<pre>  ┌────────────────────────────────────────────────────────────────────────┐
+  │                   BIBLIOTECA DE PROMPTS DEL PROYECTO                   │
+  │  • Prompts 1 - 5   : ChatGPT (Dirección de Arte e Imágenes)            │
+  │  • Prompts 6 - 8   : ChatGPT / Google Flow (Animación de Video)        │
+  │  • Prompts 9 - 25  : Antigravity (Desarrollo Frontend HTML/CSS/JS)     │
+  │  • Prompt 26       : Antigravity (Optimización y Performance)          │
+  └────────────────────────────────────────────────────────────────────────┘</pre>
+  </div>
+
+  <div class="prompt-index">
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 01</span><span class="pi-tool chatgpt">ChatGPT</span></div>
+      <div class="pi-text">"Crea una imagen en relación de aspecto 16:9, en alta calidad, sin elementos de interfaz (UI), sin textos, con estilo cinematográfico y basada en el concepto de una maleta protagonista con elementos de viaje alrededor."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 02</span><span class="pi-tool chatgpt">ChatGPT</span></div>
+      <div class="pi-text">"Deja más espacio libre en la parte superior para colocar un título. Reduce la escala de la maleta un 10% acercándola más al borde inferior, y haz que el cielo tenga un tono celeste más uniforme, sin un brillo blanco tan saturado."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 03</span><span class="pi-tool chatgpt">ChatGPT</span></div>
+      <div class="pi-text">"Genera una nueva versión más cinemática, con mejor contraste e iluminación; esta será la definitiva."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 04</span><span class="pi-tool chatgpt">ChatGPT</span></div>
+      <div class="pi-text">"Me gusta la secuencia de viaje, pero la utilizaré más adelante en la web. Para la cabecera principal (hero section) necesito una imagen con un concepto similar pero diseñada para un bucle continuo. Dame tres propuestas donde la maleta sea la protagonista sobre un fondo limpio y minimalista, dejando suficiente espacio negativo arriba para el título. No incluyas aviones, globos ni elementos que queden extraños al intentar animarlos en loop."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 05</span><span class="pi-tool chatgpt">ChatGPT</span></div>
+      <div class="pi-text">"Dame una propuesta con la maleta en un fondo mucho más limpio: una terraza minimalista frente al mar, con suelo reflectante liso y horizonte despejado. Deja bastante espacio negativo arriba para el título y genera la imagen en alta calidad y estilo cinematográfico."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 06</span><span class="pi-tool flow">ChatGPT / Flow</span></div>
+      <div class="pi-text">"Genera un prompt detallado para crear un video en plano secuencia: la maleta debe abrirse suavemente hacia la cámara y, en lugar de ropa, revelar un mundo cinematográfico en su interior. La cámara debe avanzar rápidamente, entrar por dentro de la maleta y desembocar a pie de calle en una gran ciudad moderna..."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 07</span><span class="pi-tool flow">ChatGPT / Flow</span></div>
+      <div class="pi-text">"Genera un prompt de video para animar esta imagen en bucle perfecto (seamless loop) de 6 a 8 segundos. La cámara debe mantenerse estática mientras la maleta azul gira 360 grados sobre su eje vertical a velocidad constante..."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 08</span><span class="pi-tool flow">Google Flow</span></div>
+      <div class="pi-text">"Genera la animación de nuevo. Puedes reducir la duración a menos segundos si es necesario, pero asegura un bucle continuo perfecto (seamless loop). Presta especial atención al asa de la maleta para que termine exactamente en la misma posición y orientación en la que comienza."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 09</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"Construye un archivo index.html único y listo para producción (con CSS y JS inline), utilizando la tipografía Poppins y sin librerías externas. Adapta el copy para una agencia de viajes moderna, utilizando la imagen adjunta como fondo de la sección hero."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 10</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"Analiza la imagen y reubica los elementos: sube el título para que quede en el cielo, justo encima de la maleta, y ajusta los colores de la tipografía para garantizar un contraste óptimo con el fondo."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 11</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"Centra el titular y el subtítulo, ubicando el botón de acción debajo. El titular debe ser grande y con una tipografía moderna. Alinea el header y el footer en la misma dirección y añade detalles sutiles de alta calidad en las esquinas, manteniendo una estética editorial estilo Awwwards."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 12</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"Crea una sección hero basándote en la siguiente especificación de diseño: márgenes laterales de 24 px. Título principal centrado a 120 px del borde superior: «Aventura sin bordes. / Regresa con historias.»... Fuentes requeridas: Inter (peso 400 para titulares) y Barlow (para interfaz y cuerpo)."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 13</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"Reemplaza el fondo de la sección principal por el video de la maleta en loop que acabo de añadir en la carpeta del proyecto. Asegúrate de que se reproduzca en bucle continuo de forma automática y fluida."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 14</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"En la carpeta del proyecto, implementa el video que te acabo de dejar para crear una experiencia de scrollytelling. Extrae el video como una secuencia de fotogramas y móntalo en un canvas interactivo, de modo que el usuario avance por las secciones y el contenido de la web a medida que hace scroll."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 15</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"Al deslizar hacia abajo, la pantalla debe realizar un zoom progresivo hacia la maleta; esta debe abrirse y dar paso secuencial a 3 o 4 destinos mundiales a pantalla completa."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 16</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"Suaviza la curva de aceleración con una transición CSS o interpolación lineal (lerp). Haz que el titular principal haga un desvanecimiento (fade out con opacity: 0) y se eleve ligeramente a medida que el scroll avanza del 0% al 15%. Asegura que el foco del zoom coincida exactamente con el centro de la maleta (transform-origin)."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 17</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"Añade viñetas oscuras degradadas (vignette overlays) sutiles en la parte superior e inferior de cada diapositiva para asegurar legibilidad. Ajusta la entrada de los textos para que aparezcan con un efecto de revelado por máscara o un desplazamiento vertical retardado respecto a la imagen."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 18</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"Integra una barra de progreso de scroll en el lateral o pie de página, un indicador interactivo que cambie de número según el destino visible (01/03, 02/03, 03/03), y un botón call-to-action flotante discretamente integrado ('Explorar ruta' o 'Reservar')."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 19</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"Ajusta los tamaños de fuente utilizando clamp() y asegura que la maleta se mantenga siempre visible y centrada en vertical, independientemente de la relación de aspecto del monitor."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 20</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"La segunda sección quedó muy compacta; dale mayor altura y más espacio vertical para que respire. Crea también una sección final después de la secuencia de imágenes del viaje, que sea amplia, minimalista y mantenga la coherencia visual con la sección hero. Reduce además el exceso de textos decorativos para no saturar la vista."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 21</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"Elimina todos los puntos azules flotantes con texto y los textos secundarios que los acompañan a los lados; dejan la interfaz recargada y distraen del recorrido visual. Elimina también los botones que dicen 'Empezar a rodar' o 'A rodar', conservando únicamente la navegación principal limpia."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 22</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"Cambia los fondos claros de las secciones intermedias por el tono oscuro de la sección final. Esto evitará saltos de color bruscos durante el scroll, ya que la secuencia de la ciudad dentro de la maleta tiene una atmósfera nocturna predominante."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 23</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"Ajusta el titular principal («Aventura sin bordes. Regresa con historias»): haz que ambas líneas compartan el mismo tono de blanco al 100% de opacidad, junta un poco más el interlineado entre ellas y sube el bloque completo un par de píxeles hacia arriba."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 24</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"La transición hacia la secuencia de imágenes se siente muy dura. Aplica una máscara de degradado (overlay con gradiente superior) sobre el contenedor del canvas para que el inicio de la animación se funda de manera gradual y natural con la sección anterior."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 25</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"Elimina estilos redundantes y optimiza el script inline dentro del index.html. Confirma que las fuentes de Google Fonts carguen de forma asíncrona sin bloquear el renderizado de la página."</div>
+    </div>
+    <div class="pi-card">
+      <div class="pi-head"><span class="pi-num">PROMPT 26</span><span class="pi-tool anti">Antigravity</span></div>
+      <div class="pi-text">"En dispositivos móviles, oculta los enlaces secundarios centrales y apila el contenido del pie de forma vertical."</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CAP 7 ================= -->
+<section id="cap7" class="section">
+  <span class="badge green">CAPÍTULO 7</span>
+  <h2>Conclusión, Ejercicios y Recursos Finales</h2>
+
+  <h3>1. Resumen de Todo lo Aprendido</h3>
+  <div class="card">
+    <p>Has descubierto cómo orquestar múltiples inteligencias artificiales especializadas para construir un sitio web animado cinemático:</p>
+    <ul>
+      <li><strong>ChatGPT/Gemini:</strong> Actúan como directores de arte y redactores de prompts.</li>
+      <li><strong>Google Flow:</strong> Genera los elementos en movimiento y bucles cinemáticos.</li>
+      <li><strong>Antigravity:</strong> Asistente de programación que traduce conceptos visuales en código interactivo en un canvas.</li>
+      <li><strong>Hostinger:</strong> Proporciona la infraestructura para publicar la web en minutos.</li>
+    </ul>
+  </div>
+
+  <h3>2. Lista de Conceptos Clave</h3>
+  <div class="card-grid">
+    <div class="card"><h4>Scroll-telling</h4><p>Animación controlada por el avance de la página.</p></div>
+    <div class="card"><h4>Seamless Loop</h4><p>Video infinito sin cortes.</p></div>
+    <div class="card"><h4>Canvas de Fotogramas</h4><p>Descomposición de video controlada por código.</p></div>
+    <div class="card"><h4>Espacio Negativo</h4><p>Área libre de elementos para alojar tipografía legible.</p></div>
+    <div class="card"><h4>Interpolación Linear (Lerp)</h4><p>Suavizado matemático del scroll.</p></div>
+    <div class="card"><h4>Clamp()</h4><p>Función CSS para tipografía responsive fluida.</p></div>
+  </div>
+
+  <h3>3. Errores que NUNCA Deben Cometerse</h3>
+  <div class="card">
+    <ol>
+      <li>❌ <strong>Cargar imágenes con botones o textos pre-renderizados:</strong> Impide que la web sea verdaderamente responsive y reaccione al idioma del usuario.</li>
+      <li>❌ <strong>Usar videos demasiado pesados sin extraer fotogramas:</strong> Genera retardos insoportables en móviles.</li>
+      <li>❌ <strong>Olvidar probar en pantalla vertical (smartphone):</strong> El 70% de las visitas serán móviles; la maleta siempre debe mantenerse centrada.</li>
+      <li>❌ <strong>Mezclar colores de fondo contrastantes entre secciones:</strong> Produce destellos blancos desagradables durante la navegación nocturna.</li>
+    </ol>
+  </div>
+
+  <h3>4. Recomendaciones para Seguir Aprendiendo</h3>
+  <div class="card">
+    <ul>
+      <li>Experimenta cambiando la temática: aplica este mismo flujo a una web de relojes de lujo, concesionarios de automóviles o gastronomía.</li>
+      <li>Explora la galería de inspiraciones en <strong>Dynamo Sites</strong> (<code>dynamosites.com</code>) para descubrir nuevos prompts de secciones animadas.</li>
+      <li>Practica la redacción de prompts cinemáticos estudiando conceptos de fotografía (apertura de lente, iluminación volumétrica, profundidad de campo).</li>
+    </ul>
+  </div>
+
+  <h3>5. Ejercicios Prácticos con Soluciones Explicadas</h3>
+  <div class="acc">
+    <div class="acc-head">Ejercicio 1: Ajuste de visibilidad de texto sobre fondo brillante</div>
+    <div class="acc-body">
+      <p><strong>Problema:</strong> Tienes un titular blanco que se pierde cuando la maleta pasa por una zona de playa con arena muy clara.</p>
+      <div class="callout example">
+        <span class="lbl">Solución explicada</span>
+        Pide a Antigravity lo siguiente: <em>"Añade una viñeta degradada oscura (vignette overlay) en la parte superior e inferior del contenedor para aumentar el contraste del texto sin alterar la imagen base."</em>
+      </div>
+    </div>
+  </div>
+
+  <div class="acc">
+    <div class="acc-head">Ejercicio 2: El video en loop salta bruscamente</div>
+    <div class="acc-body">
+      <p><strong>Problema:</strong> Al finalizar la vuelta de 360°, la imagen da un pequeño tirón.</p>
+      <div class="callout example">
+        <span class="lbl">Solución explicada</span>
+        Aplica el Prompt 8 en Google Flow indicando: <em>"Asegura un seamless loop reduciendo la duración a 5 segundos y forzando a que la posición final coincida exactamente con el fotograma de inicio."</em>
+      </div>
+    </div>
+  </div>
+
+  <h3>6. Glosario de Términos Técnicos</h3>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Término</th><th>Definición</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Assets</strong></td><td>Todos los archivos de soporte de una web (imágenes, videos, fuentes, iconos).</td></tr>
+        <tr><td><strong>Canvas</strong></td><td>Elemento HTML5 que permite dibujar y animar gráficos mediante programación JavaScript.</td></tr>
+        <tr><td><strong>CSS Inline</strong></td><td>Estilos de diseño escritos directamente dentro del mismo archivo HTML.</td></tr>
+        <tr><td><strong>FTP / File Manager</strong></td><td>Herramientas para transferir archivos desde tu ordenador al servidor web.</td></tr>
+        <tr><td><strong>Google Fonts</strong></td><td>Servicio gratuito de tipografías web optimizadas para carga rápida.</td></tr>
+        <tr><td><strong>Prompt</strong></td><td>Instrucción o comando en texto que se le da a una inteligencia artificial.</td></tr>
+        <tr><td><strong>UI (User Interface)</strong></td><td>Interfaz de usuario; los elementos visibles como botones, menús y barras.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= EJERCICIOS ================= -->
+<section id="ejercicios" class="section">
+  <span class="badge amber">EJERCICIOS PRÁCTICOS</span>
+  <h2>15 Ejercicios para Aprender Haciendo</h2>
+  <p style="color:var(--muted)">Colección de ejercicios conceptuales, de diagnóstico, de redacción de prompts, troubleshooting y diseño de solución. Cada ejercicio incluye enunciado, solución paso a paso, explicación causal y el error típico a evitar.</p>
+
+  <div class="callout info">
+    <span class="lbl">Cómo usar esta sección</span>
+    Abre cada ejercicio, lee primero el enunciado e intenta resolverlo por tu cuenta. Después despliega la solución paso a paso y compara tu razonamiento con el propuesto. Cada ejercicio tiene un nivel de dificultad asignado.
+  </div>
+
+  <div class="ex-legend">
+    <div class="lg"><span class="t">🟢 Básico</span><span class="d">Fundamentos conceptuales y diagnóstico directo.</span></div>
+    <div class="lg"><span class="t">🟡 Intermedio</span><span class="d">Redacción de prompts, troubleshooting y código.</span></div>
+    <div class="lg"><span class="t">🟣 Avanzado</span><span class="d">Diseño de solución, casos de estudio y optimización.</span></div>
+  </div>
+
+  <h3>Ejercicios</h3>
+
+  <!-- EJERCICIO 1 -->
+  <div class="acc open">
+    <div class="acc-head">
+      <span class="ex-title">Ejercicio 1 — Conceptual</span>
+      <span class="badge green">Básico</span>
+    </div>
+    <div class="acc-body">
+      <h4>Enunciado</h4>
+      <p>Un cliente mira tu web y pregunta: "si es un video, ¿por qué no avanza solo?". Define con tus palabras los cuatro conceptos fundamentales del tutorial (scrollytelling, secuencia de fotogramas en canvas, seamless loop y prompting visual), indica qué problema resuelve cada uno y en qué fase del proyecto se aplica.</p>
+
+      <h4>Solución paso a paso</h4>
+      <ol>
+        <li><strong>Scrollytelling:</strong> técnica narrativa que vincula el avance del scroll con la progresión de la historia visual. <em>Fase: diseño de la experiencia.</em></li>
+        <li><strong>Secuencia de fotogramas en canvas:</strong> el video se descompone en imágenes individuales y el scroll decide qué fotograma se muestra. <em>Fase: implementación frontend.</em></li>
+        <li><strong>Seamless loop:</strong> video corto cuyo último fotograma coincide con el primero, para reproducirse infinitamente sin salto. <em>Fase: generación de video del hero.</em></li>
+        <li><strong>Prompting visual:</strong> instrucciones en lenguaje natural con criterios estéticos y técnicos dirigidas a la IA. <em>Fase: transversal, desde la primera imagen hasta la limpieza final.</em></li>
+        <li><strong>Encadenamiento:</strong> prompting → assets → loop para el hero → canvas para el recorrido → código que une todo.</li>
+      </ol>
+
+      <div class="callout info">
+        <span class="lbl">Por qué (Explicación causal)</span>
+        Los cuatro conceptos son capas distintas del mismo flujo. El scroll no "reproduce" nada por sí solo: necesita una variable normalizada que traduzca posición de página en índice de fotograma. El loop resuelve la continuidad del fondo; el canvas resuelve el control temporal. Sin esa separación, la web no puede ser simultáneamente narrativa y cinemática.
+      </div>
+
+      <div class="callout warn">
+        <span class="lbl">Error típico a evitar</span>
+        Confundir scrollytelling con "animaciones que se activan al hacer scroll" (efectos puntuales). Es problemático porque produce secciones fragmentadas que se encienden y apagan, en lugar de una progresión continua donde cada píxel de scroll cuenta.
+      </div>
+    </div>
+  </div>
+
+  <!-- EJERCICIO 2 -->
+  <div class="acc">
+    <div class="acc-head">
+      <span class="ex-title">Ejercicio 2 — Diagnóstico de error</span>
+      <span class="badge green">Básico</span>
+    </div>
+    <div class="acc-body">
+      <h4>Enunciado</h4>
+      <p>En la sección hero, el video en bucle que generaste muestra una gaviota cruzando el encuadre y un globo aerostático que aparece y desaparece. Al reproducirse en bucle se percibe un salto brusco cada 7 segundos. Identifica la causa raíz y propón la corrección.</p>
+
+      <h4>Solución paso a paso</h4>
+      <ol>
+        <li>Observar el video fotograma a fotograma: al final del ciclo la gaviota está fuera del encuadre y el globo ha desaparecido; al inicio, la gaviota reaparece desde el borde y el globo también.</li>
+        <li><strong>Causa raíz:</strong> hay elementos cuyo estado inicial no coincide con el estado final del ciclo. No es un problema de duración, es un problema de contenido no cíclico.</li>
+        <li><strong>Corrección:</strong> regenerar el video con un prompt que excluya elementos voladores y que fije la atención en objetos cuyo estado se pueda repetir (giro de la maleta, viento en ramas, ondulación del agua).</li>
+        <li>Añadir explícitamente al prompt: cámara estática, sin cambios de escala, sin objetos que entren o salgan del encuadre.</li>
+        <li>Validar comparando primer y último fotograma lado a lado.</li>
+      </ol>
+
+      <div class="callout info">
+        <span class="lbl">Por qué (Explicación causal)</span>
+        Un modelo de video no sabe que el resultado se va a reproducir en bucle: genera una secuencia con inicio y fin narrativos. Si el contenido introduce o retira objetos durante el clip, el reinicio hace visible la discontinuidad. La corrección funciona porque elimina la fuente del desfase, no porque alargue o acorte el clip.
+      </div>
+
+      <div class="callout warn">
+        <span class="lbl">Error típico a evitar</span>
+        Acortar el video a 4 segundos pensando que "así se nota menos". Es problemático porque el salto sigue ocurriendo en cada reinicio y además se acelera la frecuencia del fallo, haciéndolo más perceptible.
+      </div>
+    </div>
+  </div>
+
+  <!-- EJERCICIO 3 -->
+  <div class="acc">
+    <div class="acc-head">
+      <span class="ex-title">Ejercicio 3 — Redacción de prompt</span>
+      <span class="badge amber">Intermedio</span>
+    </div>
+    <div class="acc-body">
+      <h4>Enunciado</h4>
+      <p>Necesitas una imagen hero 16:9 para una agencia de buceo: una embarcación pequeña en el tercio inferior, agua turquesa y cielo despejado. La imagen servirá como fondo con un titular centrado arriba y un botón de acción abajo a la derecha. Redacta el prompt dirigido a ChatGPT/DALL·E e incluye todas las restricciones que garanticen su uso en web.</p>
+
+      <h4>Solución paso a paso</h4>
+      <ol>
+        <li>Abrir con el formato y calidad: relación 16:9, alta resolución, estilo cinematográfico.</li>
+        <li>Bloquear elementos prohibidos: sin elementos de interfaz, sin textos, sin logotipos, sin marcas de agua.</li>
+        <li>Definir composición: embarcación pequeña ubicada en el tercio inferior, ligeramente descentrada hacia la izquierda.</li>
+        <li>Reservar espacio negativo: al menos el 40% superior libre para el titular; zona inferior derecha con agua uniforme para el botón.</li>
+        <li>Fijar atmósfera: cielo celeste uniforme sin nubes densas, luz suave, sin destellos saturados.</li>
+        <li>Cerrar con una cláusula de uso: la imagen debe funcionar como fondo con tipografía superpuesta sin perder legibilidad.</li>
+      </ol>
+
+      <div class="callout info">
+        <span class="lbl">Por qué (Explicación causal)</span>
+        Los generadores de imagen tienden a centrar el sujeto y a "rellenar" el encuadre con detalles. Si no se especifica el espacio negativo, el titular se solapará con el sujeto y el contraste caerá por debajo del umbral legible. Nombrar el uso final (fondo con texto encima) fuerza al modelo a producir una composición compatible con esa función.
+      </div>
+
+      <div class="callout warn">
+        <span class="lbl">Error típico a evitar</span>
+        Escribir "una foto bonita de un barco en el mar al atardecer". Es problemático porque la IA devolverá una imagen cuadrada o apaisada sin control, con el barco centrado, quizá con texto generado encima, imposible de usar como fondo de una sección hero.
+      </div>
+    </div>
+  </div>
+
+  <!-- EJERCICIO 4 -->
+  <div class="acc">
+    <div class="acc-head">
+      <span class="ex-title">Ejercicio 4 — Análisis comparativo</span>
+      <span class="badge green">Básico</span>
+    </div>
+    <div class="acc-body">
+      <h4>Enunciado</h4>
+      <p>Compara el uso de un <code>&lt;video autoplay loop&gt;</code> frente a una secuencia de fotogramas en <code>&lt;canvas&gt;</code> para la sección de recorrido por ciudades del proyecto. Indica en qué casos conviene cada uno y por qué el tutorial los combina en vez de elegir solo uno.</p>
+
+      <h4>Solución paso a paso</h4>
+      <ol>
+        <li><strong>&lt;video&gt;:</strong> reproduce en tiempo real, independiente del scroll. Ideal para el hero, donde la animación debe fluir sola.</li>
+        <li><strong>&lt;canvas&gt; con fotogramas:</strong> la posición del scroll mapea a un índice de fotograma. Ideal para el recorrido narrativo, donde el usuario debe "controlar" el avance.</li>
+        <li>Comparar fricción: el video no se puede congelar en un punto exacto sin generar saltos ni buffering; el canvas sí, porque solo dibuja la imagen correspondiente.</li>
+        <li>Comparar peso: el video es un archivo único y pesado; los fotogramas son muchos archivos pequeños y comprimibles.</li>
+        <li><strong>Criterio de decisión:</strong> ¿la animación debe correr sola? → video. ¿Debe responder al usuario? → canvas.</li>
+        <li>Combinación: el hero usa loop continuo para dar vida sin exigir acción; el canvas toma el relevo cuando el usuario empieza a desplazarse.</li>
+      </ol>
+
+      <div class="callout info">
+        <span class="lbl">Por qué (Explicación causal)</span>
+        Un <code>&lt;video&gt;</code> tiene su propio reloj interno. Forzarlo a seguir el scroll obliga a manipular <code>currentTime</code>, lo que provoca microsaltos, esperas de decodificación y comportamiento distinto en cada navegador móvil. El canvas en cambio no tiene reloj: es un lienzo estático que tú pintas, así que la sincronía con el scroll es exacta por construcción.
+      </div>
+
+      <div class="callout warn">
+        <span class="lbl">Error típico a evitar</span>
+        Usar <code>&lt;video&gt;</code> con <code>currentTime</code> controlado por scroll "para no dividir en fotogramas". Es problemático porque el video sigue descargando y decodificando en segundo plano, generando tirones y consumo de batería, especialmente en móviles.
+      </div>
+    </div>
+  </div>
+
+  <!-- EJERCICIO 5 -->
+  <div class="acc">
+    <div class="acc-head">
+      <span class="ex-title">Ejercicio 5 — Troubleshooting</span>
+      <span class="badge amber">Intermedio</span>
+    </div>
+    <div class="acc-body">
+      <h4>Enunciado</h4>
+      <p>El video del hero se reproduce correctamente, pero cada vez que reinicia la maleta aparece girada unos 15° respecto al primer fotograma. Describe en orden los pasos que seguirías para corregirlo.</p>
+
+      <h4>Solución paso a paso</h4>
+      <ol>
+        <li>Exportar el primer y el último fotograma y compararlos visualmente para confirmar el desfase.</li>
+        <li>Verificar si el prompt original incluía la cláusula de cierre cíclico; si no, el modelo no tenía motivo para alinear el final con el inicio.</li>
+        <li>Regenerar con un prompt de ajuste que pida explícitamente: bucle continuo perfecto, cámara estática, sin cambios de escala.</li>
+        <li>Añadir un ancla concreta: que el asa de la maleta termine exactamente en la misma posición y orientación en la que comienza.</li>
+        <li>Si aún falla, reducir la duración del clip (por ejemplo a 5 segundos) manteniendo el requisito de cierre.</li>
+        <li>Volver a comparar primer y último fotograma antes de subir el archivo al proyecto.</li>
+      </ol>
+
+      <div class="callout info">
+        <span class="lbl">Por qué (Explicación causal)</span>
+        Los modelos de video priorizan la coherencia interna del clip, no la coincidencia entre extremos. El desfase es un subproducto de la libertad creativa del modelo. Al introducir un elemento de referencia concreto (el asa) y una restricción de movimiento (cámara estática, sin escala), se reduce el espacio de salidas posibles hasta que la única solución consistente es la cíclica.
+      </div>
+
+      <div class="callout warn">
+        <span class="lbl">Error típico a evitar</span>
+        Regenerar el video "a ver si esta vez sale bien" sin cambiar el prompt. Es problemático porque el modelo no tiene razón alguna para producir un cierre cíclico si nadie se lo exige; el resultado será aleatorio y probablemente falle otra vez.
+      </div>
+    </div>
+  </div>
+
+  <!-- EJERCICIO 6 -->
+  <div class="acc">
+    <div class="acc-head">
+      <span class="ex-title">Ejercicio 6 — Mejora de prompt</span>
+      <span class="badge amber">Intermedio</span>
+    </div>
+    <div class="acc-body">
+      <h4>Enunciado</h4>
+      <p>Un compañero escribió este prompt para Google Flow: "Haz un video de una maleta que se abre y muestra ciudades". Mejóralo para obtener un plano secuencia cinemático sin cortes visibles que atraviese varias ciudades. Justifica cada añadido.</p>
+
+      <h4>Solución paso a paso</h4>
+      <ol>
+        <li>Sustituir el verbo genérico "haz" por una descripción de plano: plano secuencia, sin cortes visibles.</li>
+        <li>Especificar el movimiento inicial: la maleta se abre suavemente hacia la cámara.</li>
+        <li>Definir el contenido interior como escenario, no como objeto: en lugar de ropa, un mundo cinematográfico en su interior.</li>
+        <li>Describir el recorrido: la cámara avanza rápidamente, entra dentro de la maleta y desemboca a pie de calle en una gran ciudad moderna.</li>
+        <li>Encadenar destinos: mediante transiciones fluidas y a alta velocidad, atravesar una segunda, tercera y cuarta ciudad antes de frenar.</li>
+        <li>Cerrar con cualidades sensoriales: iluminación realista, profundidad, sensación de viaje dinámico, sin textos ni cortes.</li>
+      </ol>
+
+      <div class="callout info">
+        <span class="lbl">Por qué (Explicación causal)</span>
+        El modelo necesita términos cinematográficos explícitos porque su espacio latente está entrenado con vocabulario técnico de cine. "Plano secuencia" activa continuidad sin cortes; "la cámara avanza" define un vector de movimiento; "transición fluida" evita que el modelo corte a negro entre ciudades. Sin estos términos, la salida más probable es un collage de escenas inconexas.
+      </div>
+
+      <div class="callout warn">
+        <span class="lbl">Error típico a evitar</span>
+        Escribir prompts poéticos ("un viaje mágico dentro de la maleta"). Es problemático porque la IA interpreta la poesía como descripción ambiental, no como instrucción de cámara, y devuelve una sucesión de planos estáticos sin el dinamismo requerido.
+      </div>
+    </div>
+  </div>
+
+  <!-- EJERCICIO 7 -->
+  <div class="acc">
+    <div class="acc-head">
+      <span class="ex-title">Ejercicio 7 — Resolución práctica (código)</span>
+      <span class="badge amber">Intermedio</span>
+    </div>
+    <div class="acc-body">
+      <h4>Enunciado</h4>
+      <p>Describe en pasos cómo lograrías que el titular del hero se desvanezca y se eleve ligeramente durante el primer 15% del scroll, de forma suave. Indica qué propiedad usarías para el desvanecimiento, cómo calcularías el progreso y cómo evitarías que el efecto se sienta brusco.</p>
+
+      <h4>Solución paso a paso</h4>
+      <ol>
+        <li>Añadir un listener de scroll con <code>{passive:true}</code> para no bloquear el hilo principal.</li>
+        <li>Calcular un progreso normalizado <code>p = min(1, scrollY / (0.15 * altoHero))</code>, donde <code>altoHero</code> sea la altura de la sección hero.</li>
+        <li>Aplicar <code>opacity = 1 - p</code> al titular.</li>
+        <li>Aplicar <code>transform: translateY(-p * 20px)</code> (o similar) para el desplazamiento hacia arriba.</li>
+        <li>Suavizar con interpolación lineal (lerp): guardar un valor suave que avance un porcentaje hacia <code>p</code> en cada frame.</li>
+        <li>Ejecutar todo dentro de <code>requestAnimationFrame</code> para no recalcular en cada evento.</li>
+        <li>Opcional: aplicar <code>will-change: opacity, transform</code> al titular para que el navegador lo prepare para animar.</li>
+      </ol>
+
+      <div class="callout info">
+        <span class="lbl">Por qué (Explicación causal)</span>
+        El scroll del ratón llega en eventos discretos e irregulares. Si se aplica directamente al estilo, el efecto "escalona". Normalizar el progreso con una fracción del alto del hero (y no con píxeles absolutos) hace que el comportamiento sea proporcional en cualquier pantalla. El lerp amortigua los saltos porque la variable visible nunca salta directamente al objetivo.
+      </div>
+
+      <div class="callout warn">
+        <span class="lbl">Error típico a evitar</span>
+        Alternar clases visible/oculto al cruzar un umbral. Es problemático porque la transición es binaria: el titular desaparece de golpe o hace un crossfade que no termina de coincidir con la sensación de estar "acompañando" el scroll.
+      </div>
+    </div>
+  </div>
+
+  <!-- EJERCICIO 8 -->
+  <div class="acc">
+    <div class="acc-head">
+      <span class="ex-title">Ejercicio 8 — Diseño de solución</span>
+      <span class="badge purple">Avanzado</span>
+    </div>
+    <div class="acc-body">
+      <h4>Enunciado</h4>
+      <p>Diseña la estructura lógica del <code>index.html</code> único (sin librerías externas) que integrará: hero con video en loop, sección de scrollytelling con canvas, overlays de legibilidad, indicador de destino, barra de progreso y footer. Describe las secciones, dónde vive el estado del scroll, cómo se precargan los fotogramas y cómo se evita que las fuentes bloqueen el renderizado.</p>
+
+      <h4>Solución paso a paso</h4>
+      <ol>
+        <li><strong>&lt;head&gt;:</strong> metadatos, título, enlaces a Google Fonts con preconnect y carga asíncrona (o <code>font-display: swap</code>), y bloque <code>&lt;style&gt;</code> con variables de color, tipografía y layout.</li>
+        <li><strong>&lt;body&gt; en orden:</strong> cabecera/nav → <code>section.hero</code> con <code>&lt;video&gt;</code> en loop → <code>section.recorrido</code> con <code>&lt;canvas&gt;</code> + overlays (gradientes superior e inferior) + textos por destino → footer.</li>
+        <li><strong>Estado del scroll:</strong> una única variable global actualizada en un listener <code>{passive:true}</code> y leída dentro de <code>requestAnimationFrame</code>.</li>
+        <li><strong>Precarga de fotogramas:</strong> array de objetos <code>Image</code>, se crean y se asigna <code>src</code> en bucle; se espera al primer fotograma cargado antes de mostrar la sección para no parpadear.</li>
+        <li><strong>Render:</strong> en cada frame, calcular <code>índice = Math.round(progreso * (totalFrames - 1))</code> y dibujar en canvas con <code>drawImage</code>.</li>
+        <li><strong>Indicador y barra de progreso:</strong> derivados del mismo índice (01/03, 02/03…) y del porcentaje total de scroll, sin lógica duplicada.</li>
+        <li><strong>Fuentes:</strong> cargar sin bloquear el renderizado inicial; el titular debe verse con una fuente de sistema mientras carga la definitiva.</li>
+      </ol>
+
+      <div class="callout info">
+        <span class="lbl">Por qué (Explicación causal)</span>
+        Concentrar todo en un único archivo elimina dependencias de rutas y da a la IA un contexto completo para modificar cualquier parte sin romper otras. Mantener un único origen de verdad (el progreso normalizado) evita que el canvas, el indicador y la barra se desincronicen. Cargar fuentes de forma no bloqueante es crítico porque el <code>index.html</code> es el único recurso y no puede quedarse esperando a un CSS externo.
+      </div>
+
+      <div class="callout warn">
+        <span class="lbl">Error típico a evitar</span>
+        Repartir CSS y JS en archivos separados y luego pedir a la IA cambios de diseño. Es problemático porque el agente modifica un archivo y olvida el otro, generando inconsistencias silenciosas que solo aparecen en producción.
+      </div>
+    </div>
+  </div>
+
+  <!-- EJERCICIO 9 -->
+  <div class="acc">
+    <div class="acc-head">
+      <span class="ex-title">Ejercicio 9 — Conceptual</span>
+      <span class="badge green">Básico</span>
+    </div>
+    <div class="acc-body">
+      <h4>Enunciado</h4>
+      <p>Explica qué significan "prompting visual" y "agente de código" en este flujo, y por qué el rol humano se desplaza hacia la dirección creativa. Da un ejemplo de instrucción de director de arte y otro de desarrollador, indicando a qué IA se dirigiría cada uno.</p>
+
+      <h4>Solución paso a paso</h4>
+      <ol>
+        <li><strong>Prompting visual:</strong> describir en lenguaje natural una imagen o un video con criterios estéticos (composición, luz, atmósfera) y técnicos (formato, restricciones, movimiento).</li>
+        <li><strong>Agente de código:</strong> una IA que lee y modifica archivos del proyecto (HTML, CSS, JS) a partir de instrucciones en texto.</li>
+        <li><strong>Desplazamiento del rol:</strong> la ejecución manual (dibujar, animar, programar) se delega; la decisión de qué se quiere y cómo se evalúa sigue siendo humana.</li>
+        <li><strong>Ejemplo de director de arte:</strong> "deja más aire arriba para el titular, baja la maleta al tercio inferior y unifica el cielo" → dirigido a ChatGPT.</li>
+        <li><strong>Ejemplo de desarrollador:</strong> "aplica <code>clamp()</code> al titular y suaviza la transición del canvas con un gradiente superior" → dirigido a Antigravity.</li>
+      </ol>
+
+      <div class="callout info">
+        <span class="lbl">Por qué (Explicación causal)</span>
+        La IA no tiene intención estética ni criterio de aceptación. Puede generar cien variantes, pero no sabe cuál es la correcta sin un humano que defina el objetivo y valide el resultado. Por eso el valor añadido se traslada de "saber hacer" a "saber pedir y saber juzgar".
+      </div>
+
+      <div class="callout warn">
+        <span class="lbl">Error típico a evitar</span>
+        Delegar la validación en la IA ("¿está bien así?"). Es problemático porque el modelo tiende a responder que sí y a justificar su propia salida, incluso cuando hay errores evidentes de contraste, recorte o coherencia.
+      </div>
+    </div>
+  </div>
+
+  <!-- EJERCICIO 10 -->
+  <div class="acc">
+    <div class="acc-head">
+      <span class="ex-title">Ejercicio 10 — Caso de estudio</span>
+      <span class="badge purple">Avanzado</span>
+    </div>
+    <div class="acc-body">
+      <h4>Enunciado</h4>
+      <p>Al terminar la secuencia del canvas, el usuario percibe un "golpe" visual: el último fotograma es nocturno y la sección siguiente tiene fondo blanco. Además, la entrada al canvas desde el hero es abrupta. Propón un plan de tres intervenciones concretas —una cromática, una de transición, una de jerarquía visual— y ordénalas justificando la secuencia.</p>
+
+      <h4>Solución paso a paso</h4>
+      <ol>
+        <li><strong>Intervención cromática (primera):</strong> cambiar los fondos claros de las secciones intermedias por el tono oscuro de la sección final, para que no haya saltos de luminancia.</li>
+        <li><strong>Intervención de transición (segunda):</strong> aplicar una máscara de degradado sobre el contenedor del canvas para que el inicio de la animación se funda gradualmente con la sección anterior.</li>
+        <li><strong>Intervención de jerarquía (tercera):</strong> añadir viñetas degradadas en la parte superior e inferior de cada diapositiva y ajustar la entrada de los textos con un desplazamiento retardado o un revelado por máscara.</li>
+        <li>Validar haciendo scroll continuo de principio a fin sin detenerse, verificando que no hay destellos ni puntos donde el ojo "salte".</li>
+        <li>Verificar en móvil, donde la altura de viewport cambia y los degradados pueden quedar mal proporcionados.</li>
+      </ol>
+
+      <div class="callout info">
+        <span class="lbl">Por qué (Explicación causal)</span>
+        El "golpe" no es un problema de contenido, es un problema de continuidad perceptiva. El sistema visual humano detecta cambios bruscos de luminancia antes que cambios de contenido. Por eso la corrección cromática va primero: sin ella, cualquier otra intervención queda enmascarada por el destello. La transición suaviza el borde entre secciones; la jerarquía visual ordena la lectura dentro de cada diapositiva, evitando que la vista compita entre imagen y texto.
+      </div>
+
+      <div class="callout warn">
+        <span class="lbl">Error típico a evitar</span>
+        Añadir elementos decorativos para "tapar" el salto. Es problemático porque no resuelve el cambio de luminancia, solo añade carga cognitiva y hace la interfaz más confusa.
+      </div>
+    </div>
+  </div>
+
+  <!-- EJERCICIO 11 -->
+  <div class="acc">
+    <div class="acc-head">
+      <span class="ex-title">Ejercicio 11 — Diagnóstico de error</span>
+      <span class="badge amber">Intermedio</span>
+    </div>
+    <div class="acc-body">
+      <h4>Enunciado</h4>
+      <p>En un iPhone en vertical, el titular del hero aparece cortado por la izquierda y la maleta queda descentrada hacia arriba, dejando un vacío abajo. En escritorio el diseño se ve perfecto. Identifica las dos causas probables y describe la corrección.</p>
+
+      <h4>Solución paso a paso</h4>
+      <ol>
+        <li><strong>Causa del recorte del titular:</strong> probablemente tiene un <code>font-size</code> fijo en píxeles que no se adapta a viewports estrechos.</li>
+        <li><strong>Corrección:</strong> sustituir por <code>font-size: clamp(min, valor fluido, max)</code> y ajustar el ancho del bloque con padding lateral controlado.</li>
+        <li><strong>Causa del descentrado de la maleta:</strong> el video o la imagen se recorta con <code>object-fit: cover</code> sin control de <code>object-position</code>, así que en vertical el encuadre se desplaza hacia arriba.</li>
+        <li><strong>Corrección:</strong> definir <code>object-position</code> para centrar el sujeto en la ventana vertical, o ajustar la altura de la sección hero con unidades relativas al viewport.</li>
+        <li>Añadir una media query que apile los elementos del pie y oculte los enlaces secundarios centrales.</li>
+        <li>Verificar en DevTools emulando varios modelos (iPhone 14/15, Galaxy, iPad) y en pantalla real.</li>
+      </ol>
+
+      <div class="callout info">
+        <span class="lbl">Por qué (Explicación causal)</span>
+        El diseño 16:9 está pensado para un viewport apaisado. En vertical la relación cambia drásticamente: el ancho disponible cae y el alto crece. Todo lo que dependa de un tamaño absoluto o de un encuadre centrado horizontalmente se rompe. <code>clamp()</code> resuelve la tipografía porque interpola entre un mínimo seguro y un máximo deseado; <code>object-position</code> resuelve el encuadre porque decide qué porción de la imagen se muestra cuando hay recorte.
+      </div>
+
+      <div class="callout warn">
+        <span class="lbl">Error típico a evitar</span>
+        Comprobar solo redimensionando la ventana del escritorio. Es problemático porque el navegador de escritorio mantiene un layout horizontal y no reproduce los problemas de un viewport genuinamente vertical.
+      </div>
+    </div>
+  </div>
+
+  <!-- EJERCICIO 12 -->
+  <div class="acc">
+    <div class="acc-head">
+      <span class="ex-title">Ejercicio 12 — Redacción de prompt</span>
+      <span class="badge purple">Avanzado</span>
+    </div>
+    <div class="acc-body">
+      <h4>Enunciado</h4>
+      <p>Tu web tiene demasiados elementos flotantes (puntos con etiquetas, botones duplicados, textos decorativos laterales) y las secciones intermedias son claras mientras la última es oscura. Redacta un prompt dirigido a Antigravity que resuelva los tres problemas a la vez, sin ambigüedad y sin indicar código concreto. Después explica por qué conviene pedirlo en un solo mensaje en lugar de tres separados.</p>
+
+      <h4>Solución paso a paso</h4>
+      <ol>
+        <li>Abrir con el contexto global: "la interfaz está recargada y hay saltos cromáticos durante el scroll".</li>
+        <li>Primer requisito: eliminar los puntos flotantes con etiquetas, los textos secundarios laterales y los botones duplicados, conservando únicamente la navegación principal.</li>
+        <li>Segundo requisito: unificar los fondos de las secciones intermedias con el tono oscuro de la sección final.</li>
+        <li>Tercer requisito: mantener la coherencia visual con la sección hero, sin introducir nuevos elementos decorativos.</li>
+        <li>Cerrar con un criterio de validación: el scroll de principio a fin no debe producir destellos ni cambios bruscos de luminancia.</li>
+        <li>Enviar como un único mensaje.</li>
+      </ol>
+
+      <div class="callout info">
+        <span class="lbl">Por qué (Explicación causal)</span>
+        Los agentes de código construyen un modelo mental del proyecto a partir del mensaje. Si los requisitos llegan en mensajes separados, cada uno se aplica sin ver los otros, y es fácil que la IA reintroduzca lo eliminado o contradiga una decisión previa. Un solo mensaje da contexto global y permite aplicar los tres cambios como un sistema coherente. Además, los requisitos están relacionados: la limpieza visual y la unificación cromática comparten el objetivo de reducir la carga perceptiva.
+      </div>
+
+      <div class="callout warn">
+        <span class="lbl">Error típico a evitar</span>
+        Enviar seis prompts cortos con instrucciones aisladas ("quita los puntos", "quita los botones", "cambia el fondo"). Es problemático porque cada instrucción se ejecuta sin memoria de las demás y la IA puede eliminar algo que otra instrucción necesita conservar.
+      </div>
+    </div>
+  </div>
+
+  <!-- EJERCICIO 13 -->
+  <div class="acc">
+    <div class="acc-head">
+      <span class="ex-title">Ejercicio 13 — Resolución práctica (código)</span>
+      <span class="badge green">Básico</span>
+    </div>
+    <div class="acc-body">
+      <h4>Enunciado</h4>
+      <p>Escribe cómo aplicarías <code>clamp()</code> a un titular para que mida 48px en un móvil pequeño y 72px en un monitor grande, manteniendo un tamaño intermedio fluido. Indica qué representa cada valor de la función y por qué no usarías simplemente un valor fijo.</p>
+
+      <h4>Solución paso a paso</h4>
+      <ol>
+        <li>Identificar los tres argumentos: mínimo, valor fluido preferido, máximo.</li>
+        <li><strong>Mínimo:</strong> 48px, para no quedarse corto en pantallas estrechas.</li>
+        <li><strong>Valor preferido:</strong> una unidad relativa al viewport, como <code>5vw</code>, que crece con el ancho de la pantalla.</li>
+        <li><strong>Máximo:</strong> 72px, para no romper el layout en monitores grandes.</li>
+        <li>Regla resultante: <code>font-size: clamp(48px, 5vw, 72px);</code></li>
+        <li>Verificar en DevTools redimensionando y comprobando que el texto escala progresivamente, no a saltos.</li>
+      </ol>
+
+      <div class="callout info">
+        <span class="lbl">Por qué (Explicación causal)</span>
+        <code>clamp()</code> combina un suelo, un techo y una interpolación fluida entre ambos. El suelo evita ilegibilidad en móvil; el techo evita desbordes en pantallas grandes; el valor intermedio hace que el tamaño acompañe al viewport sin necesidad de media queries. Un valor fijo no escala: o se ve enorme en móvil o diminuto en escritorio.
+      </div>
+
+      <div class="callout warn">
+        <span class="lbl">Error típico a evitar</span>
+        Usar solo <code>5vw</code> sin mínimo. Es problemático porque en pantallas muy estrechas el texto queda por debajo del umbral legible, y el titular del hero pierde impacto justo donde más importa.
+      </div>
+    </div>
+  </div>
+
+  <!-- EJERCICIO 14 -->
+  <div class="acc">
+    <div class="acc-head">
+      <span class="ex-title">Ejercicio 14 — Troubleshooting</span>
+      <span class="badge purple">Avanzado</span>
+    </div>
+    <div class="acc-body">
+      <h4>Enunciado</h4>
+      <p>La web se ve bien en tu PC, pero en móvil tarda 9 segundos en mostrar el hero y el scroll se traba. Tienes: un video de 40 MB en el hero, 240 fotogramas PNG de 1,5 MB cada uno, y Google Fonts cargadas con un <code>&lt;link&gt;</code> normal en el <code>&lt;head&gt;</code>. Diagnostica los tres cuellos de botella y propón una corrección por cada uno.</p>
+
+      <h4>Solución paso a paso</h4>
+      <ol>
+        <li><strong>Diagnóstico del video:</strong> 40 MB es un peso desproporcionado para la primera impresión. <em>Corrección:</em> recomprimir a <code>.webm</code> o <code>.mp4</code> con bitrate razonable, recortar duración, y colocar un <em>poster</em> para que se muestre algo mientras carga.</li>
+        <li><strong>Diagnóstico de los fotogramas:</strong> 240 imágenes × 1,5 MB ≈ 360 MB, imposible de manejar en red móvil. <em>Corrección:</em> convertir a JPG o WebP comprimidos, reducir resolución para móvil, precargar solo los primeros fotogramas y cargar el resto bajo demanda.</li>
+        <li><strong>Diagnóstico de las fuentes:</strong> un <code>&lt;link&gt;</code> normal bloquea el renderizado hasta que la fuente se descarga. <em>Corrección:</em> cargar de forma asíncrona con <code>font-display: swap</code> y <code>preconnect</code> al servidor de fuentes.</li>
+        <li><strong>Priorizar:</strong> primero las fuentes (desbloquean el render), después el video (es lo primero que ve el usuario), después los fotogramas (solo se necesitan al hacer scroll).</li>
+        <li>Medir de nuevo en móvil real, no solo en DevTools, porque la emulación no refleja la latencia real de la red.</li>
+      </ol>
+
+      <div class="callout info">
+        <span class="lbl">Por qué (Explicación causal)</span>
+        El tiempo hasta el primer render depende del <em>critical path</em>: cualquier recurso bloqueante retrasa la aparición del contenido. El scroll se traba porque el hilo principal se satura decodificando imágenes grandes mientras intenta responder al evento de scroll. Reducir el peso total y repartir la carga a lo largo del tiempo libera ese hilo y permite que el scroll se mantenga fluido.
+      </div>
+
+      <div class="callout warn">
+        <span class="lbl">Error típico a evitar</span>
+        Subir todos los assets sin comprimir "porque en local se ven perfectos". Es problemático porque en local no hay latencia de red, ni límite de ancho de banda móvil, ni <em>throttling</em> de CPU; los problemas aparecen solo donde está el usuario real.
+      </div>
+    </div>
+  </div>
+
+  <!-- EJERCICIO 15 -->
+  <div class="acc">
+    <div class="acc-head">
+      <span class="ex-title">Ejercicio 15 — Diseño de solución</span>
+      <span class="badge amber">Intermedio</span>
+    </div>
+    <div class="acc-body">
+      <h4>Enunciado</h4>
+      <p>Diseña el procedimiento completo para publicar esta web en Hostinger, desde que terminas el desarrollo local hasta que verificas que un visitante en móvil la ve correctamente. Incluye la estructura de archivos a subir, dónde se colocan y al menos tres comprobaciones en vivo.</p>
+
+      <h4>Solución paso a paso</h4>
+      <ol>
+        <li><strong>Antes de subir:</strong> probar la web en DevTools con emulación de varios dispositivos móviles y comprobar scroll, video y legibilidad.</li>
+        <li>Acceder a Hostinger con las credenciales del plan y abrir el Administrador de Archivos del dominio o subdominio asignado.</li>
+        <li>Navegar hasta la carpeta pública <code>public_html</code>.</li>
+        <li>Subir manteniendo la estructura original de carpetas: <code>index.html</code> en la raíz, archivos de video en su carpeta, carpeta de fotogramas del canvas con el mismo nombre que en local, imagen de respaldo del hero.</li>
+        <li><strong>Comprobación 1:</strong> abrir la URL pública desde el móvil y verificar que el scroll es suave, sin tirones.</li>
+        <li><strong>Comprobación 2:</strong> verificar que el video del hero se reproduce en bucle sin demora perceptible.</li>
+        <li><strong>Comprobación 3:</strong> verificar la legibilidad de los textos en distintas condiciones de luz ambiente y confirmar que el certificado SSL está activo (HTTPS).</li>
+        <li>Repetir las comprobaciones en escritorio para descartar diferencias de render entre navegadores.</li>
+      </ol>
+
+      <div class="callout info">
+        <span class="lbl">Por qué (Explicación causal)</span>
+        El canvas y el <code>&lt;video&gt;</code> no cargan por "magia": el HTML referencia rutas relativas. Si al subir se aplana la estructura o se renombran carpetas, el navegador devuelve 404 y el canvas aparece vacío o el hero sin fondo. Mantener la estructura original garantiza que las rutas del <code>index.html</code> sigan apuntando a los archivos correctos. Las comprobaciones en vivo detectan problemas que en local no existen (latencia, caché del servidor, minificación, HTTPS mixto).
+      </div>
+
+      <div class="callout warn">
+        <span class="lbl">Error típico a evitar</span>
+        Subir los archivos sueltos a la raíz del hosting, o dentro de una subcarpeta distinta a <code>public_html</code>. Es problemático porque el dominio no sirve esos archivos como página pública y el usuario verá un listado de archivos o un error 403/404 en lugar de la web.
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- ================= FUENTES ================= -->
+<section id="fuentes" class="section">
+  <span class="badge amber">FUENTES Y REFERENCIAS</span>
+  <h2>Fuentes y Recursos Oficiales</h2>
+
+  <h3>Video Principal de Referencia (YouTube)</h3>
+  <div class="card">
+    <h4>ASÍ CREO WEBS ANIMADAS EN MINUTOS CON IA (ANTIGRAVITY + GEMINI + CHATGPT)</h4>
+    <p><strong>Canal:</strong> Rodrigo Olivares - Crea con IA</p>
+    <p><strong>Enlace directo:</strong><br>
+      <a href="https://youtube.com/watch?v=2TMIi2AmmyI&is=qy4sHqD7gbxAQnB1" target="_blank" rel="noopener">https://youtube.com/watch?v=2TMIi2AmmyI&is=qy4sHqD7gbxAQnB1</a>
+    </p>
+  </div>
+
+  <h3>Enlaces de Recursos Mencionados</h3>
+  <div class="card">
+    <ul>
+      <li><strong>Inspiración y Prompts de Secciones:</strong> Dynamo Sites (<code>dynamosites.com</code>)</li>
+      <li><strong>Hosting Recomendado:</strong> Hostinger (Enlace oficial de descuento: <a href="https://hostinger.com/rodrigo?utm_source=gemini" target="_blank" rel="noopener">hostinger.com/rodrigo</a>)</li>
+    </ul>
+  </div>
+
+  <h3>Fuentes Documentales del Proyecto</h3>
+  <div class="card">
+    <ol>
+      <li><strong>Documento de Prompts Oficial:</strong> <em>"Prompts Web Agencia Viajes - rodrigoolivares.com"</em>.</li>
+      <li><strong>Transcripción y Caso de Estudio:</strong> <em>"Así Creo Webs Animadas en Minutos con IA (Antigravity + Gemini + ChatGPT)"</em>.</li>
+      <li><strong>Repositorio de Fuentes:</strong> <em>"FUENTES / Nota nueva"</em>.</li>
+    </ol>
+  </div>
+
+  <h3>Fuente Principal</h3>
+  <div class="card">
+    <p><strong>Así Creo Webs Animadas en Minutos con IA (Antigravity + Gemini + ChatGPT)</strong></p>
+    <p><a href="https://youtube.com/watch?v=2TMIi2AmmyI&is=qy4sHqD7gbxAQnB1" target="_blank" rel="noopener">https://youtube.com/watch?v=2TMIi2AmmyI&is=qy4sHqD7gbxAQnB1</a></p>
+  </div>
+</section>
+
+<!-- ================= CRÉDITOS ================= -->
+<section id="creditos" class="section">
+  <span class="badge purple">CRÉDITOS</span>
+  <h2>Créditos del Tutorial</h2>
+
+  <div class="credits-svg-wrap" id="svgCreditsWrap"></div>
+
+  <div class="credits-card">
+    <span class="badge blue">TUTORIAL TÉCNICO</span>
+    <h3 style="color:var(--text);font-size:20px;margin:12px 0">Crear Webs Animadas en Minutos con IA</h3>
+    <p style="color:var(--muted);font-size:14px">Antigravity + Gemini + ChatGPT</p>
+    <div class="name">Rubén Sbarsky</div>
+    <p style="color:var(--muted);font-size:13px">Documentación Educativa · Tutorial paso a paso</p>
+    <p style="margin-top:14px;font-size:13px">
+      📅 <strong>Fecha:</strong> 27/09/2026 &nbsp;·&nbsp; 🕐 <strong>Hora:</strong> 04:22:16
+    </p>
+    <div class="latin">Fiat iustitia, ruat caelum.</div>
+  </div>
+
+  <div class="callout info">
+    <span class="lbl">Nota educativa</span>
+    Este material tiene como finalidad exclusiva la divulgación y el aprendizaje. Todo el contenido técnico se ha preservado íntegramente con fines didácticos y de estudio del flujo de trabajo asistido por inteligencia artificial.
+  </div>
+</section>
+
+</main>
+
+<footer>
+  <div>📚 Tutorial solo con fines Educativos y Divulgación</div>
+  <div>👨‍💻 Créditos: <strong>Rubén Sbarsky</strong></div>
+  <div>📅 FECHA: 27/09/2026 &nbsp;·&nbsp; Hora: 04:22:16</div>
+  <div style="font-style:italic;color:var(--amber);margin-top:8px">Fiat iustitia, ruat caelum.</div>
+</footer>
+
+<button class="back-top" id="backTop" aria-label="Volver arriba">↑</button>
+
+<script>
+(function(){
+  /* ============ SPA NAV ============ */
+  const navBtns = document.querySelectorAll('#navScroll button');
+  const sections = document.querySelectorAll('.section');
+
+  function showSection(id){
+    sections.forEach(s=>s.classList.toggle('active', s.id===id));
+    navBtns.forEach(b=>b.classList.toggle('active', b.dataset.sec===id));
+    window.scrollTo({top:0,behavior:'smooth'});
+    updateProgress();
+    if(id==='creditos') restartCreditsSvg();
+  }
+
+  navBtns.forEach(b=>{
+    b.addEventListener('click',()=>showSection(b.dataset.sec));
+  });
+
+  /* ============ PROGRESS BAR ============ */
+  const progressBar = document.getElementById('progressBar');
+  const backTop = document.getElementById('backTop');
+
+  function updateProgress(){
+    const h = document.documentElement.scrollHeight - window.innerHeight;
+    const p = h>0 ? (window.scrollY/h)*100 : 0;
+    progressBar.style.width = Math.min(100,p)+'%';
+    backTop.classList.toggle('show', window.scrollY > 300);
+  }
+  window.addEventListener('scroll',updateProgress,{passive:true});
+
+  backTop.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+
+  /* ============ ACCORDIONS ============ */
+  document.querySelectorAll('.acc-head').forEach(h=>{
+    h.addEventListener('click',()=>h.parentElement.classList.toggle('open'));
+  });
+
+  /* ============ SVG CLONE TO CRÉDITOS ============ */
+  function restartCreditsSvg(){
+    const wrap = document.getElementById('svgCreditsWrap');
+    if(!wrap) return;
+    if(wrap.firstChild){
+      const svg = wrap.querySelector('svg');
+      if(svg && svg.setCurrentTime){
+        try{ svg.setCurrentTime(0); }catch(e){}
+      }
+      return;
+    }
+    const master = document.getElementById('masterSVG');
+    if(!master) return;
+    const clone = master.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.id = 'creditsSVG';
+    wrap.appendChild(clone);
+  }
+
+  // Pre-clone for credits
+  const masterSVG = document.getElementById('masterSVG');
+  if(masterSVG){
+    const creditsWrap = document.getElementById('svgCreditsWrap');
+    if(creditsWrap && !creditsWrap.firstChild){
+      const clone = masterSVG.cloneNode(true);
+      clone.removeAttribute('id');
+      clone.id = 'creditsSVG';
+      creditsWrap.appendChild(clone);
+    }
+  }
+
+  /* ============ INITIAL PROGRESS ============ */
+  updateProgress();
+
+  /* ============ HANDLE HASH (optional) ============ */
+  if(location.hash){
+    const id = location.hash.replace('#','');
+    if(document.getElementById(id)) showSection(id);
+  }
+})();
+</script>
+</body>
+</html>
